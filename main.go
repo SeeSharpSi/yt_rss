@@ -29,16 +29,17 @@ func main() {
 
 	authRouter := r.PathPrefix("/").Subrouter()
 	authRouter.Use(handlers.AuthMiddleware)
-	authRouter.Use(handlers.AddUserIDToContext)
 
 	authRouter.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		templates.Layout(templates.IndexPage()).Render(r.Context(), w)
+		user := r.Context().Value("user").(templates.User)
+		templates.Layout(user, templates.IndexPage()).Render(r.Context(), w)
 	})
 	authRouter.HandleFunc("/videos", handlers.VideosHandler)
 	authRouter.HandleFunc("/video/{id}", handlers.VideoPageHandler)
 	authRouter.HandleFunc("/channels", handlers.ChannelsHandler)
 	authRouter.HandleFunc("/export", handlers.ExportHandler)
 	authRouter.HandleFunc("/import", handlers.ImportHandler)
+	authRouter.HandleFunc("/cycle-theme", handlers.CycleThemeHandler).Methods("POST")
 	authRouter.HandleFunc("/add-channel", handlers.AddChannelHandler).Methods("POST")
 	authRouter.HandleFunc("/delete-channel", handlers.DeleteChannelHandler).Methods("POST")
 

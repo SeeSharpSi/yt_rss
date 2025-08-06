@@ -20,8 +20,8 @@ type Channel struct {
 }
 
 func ChannelsHandler(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(int)
-	channels, err := getChannelsByUserID(userID)
+	user := r.Context().Value("user").(templates.User)
+	channels, err := getChannelsByUserID(user.ID)
 	if err != nil {
 		http.Error(w, "Failed to load channels", http.StatusInternalServerError)
 		return
@@ -32,7 +32,7 @@ func ChannelsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func AddChannelHandler(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(int)
+	user := r.Context().Value("user").(templates.User)
 	r.ParseForm()
 	handle := r.FormValue("handle")
 	showShorts := r.Form.Get("show-shorts") == "true"
@@ -63,13 +63,13 @@ func AddChannelHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var existingID int
-	err = database.DB.QueryRow("SELECT id FROM channels WHERE user_id = ? AND url = ?", userID, rssURL).Scan(&existingID)
+	err = database.DB.QueryRow("SELECT id FROM channels WHERE user_id = ? AND url = ?", user.ID, rssURL).Scan(&existingID)
 	if err != sql.ErrNoRows && err != nil {
 		http.Error(w, "Database error", http.StatusInternalServerError)
 		return
 	}
 	if existingID > 0 {
-		channels, _ := getChannelsByUserID(userID)
+		channels, _ := getChannelsByUserID(user.ID)
 		selectedChannels := make(map[string]bool)
 		templates.Channels(channels, selectedChannels, showShorts, "Channel already exists.").Render(r.Context(), w)
 		return
@@ -81,39 +81,39 @@ func AddChannelHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = database.DB.Exec("INSERT INTO channels (user_id, name, url) VALUES (?, ?, ?)", userID, channelName, rssURL)
+	_, err = database.DB.Exec("INSERT INTO channels (user_id, name, url) VALUES (?, ?, ?)", user.ID, channelName, rssURL)
 	if err != nil {
 		http.Error(w, "Failed to save channel", http.StatusInternalServerError)
 		return
 	}
 
-	channels, _ := getChannelsByUserID(userID)
+	channels, _ := getChannelsByUserID(user.ID)
 	w.Header().Set("HX-Trigger", "channelListChanged")
 	selectedChannels := make(map[string]bool)
 	templates.Channels(channels, selectedChannels, showShorts, "").Render(r.Context(), w)
 }
 
 func DeleteChannelHandler(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(int)
+	user := r.Context().Value("user").(templates.User)
 	r.ParseForm()
 	urlToDelete := r.URL.Query().Get("url")
 	showShorts := r.Form.Get("show-shorts") == "true"
 
-	_, err := database.DB.Exec("DELETE FROM channels WHERE user_id = ? AND url = ?", userID, urlToDelete)
+	_, err := database.DB.Exec("DELETE FROM channels WHERE user_id = ? AND url = ?", user.ID, urlToDelete)
 	if err != nil {
 		http.Error(w, "Failed to delete channel", http.StatusInternalServerError)
 		return
 	}
 
-	channels, _ := getChannelsByUserID(userID)
+	channels, _ := getChannelsByUserID(user.ID)
 	w.Header().Set("HX-Trigger", "channelListChanged")
 	selectedChannels := make(map[string]bool)
 	templates.Channels(channels, selectedChannels, showShorts, "").Render(r.Context(), w)
 }
 
 func ExportHandler(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(int)
-	channels, err := getChannelsByUserID(userID)
+	user := r.Context().Value("user").(templates.User)
+	channels, err := getChannelsByUserID(user.ID)
 	if err != nil {
 		http.Error(w, "Failed to fetch channels for export", http.StatusInternalServerError)
 		return
@@ -134,7 +134,7 @@ func ImportHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID := r.Context().Value("user_id").(int)
+	user := r.Context().Value("user").(templates.User)
 	r.ParseForm()
 	jsonData := r.FormValue("json_data")
 
@@ -145,7 +145,7 @@ func ImportHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	existingChannels, err := getChannelsByUserID(userID)
+	existingChannels, err := getChannelsByUserID(user.ID)
 	if err != nil {
 		http.Error(w, "Database error", http.StatusInternalServerError)
 		return
@@ -157,7 +157,7 @@ func ImportHandler(w http.ResponseWriter, r *http.Request) {
 
 	for _, channel := range channelsToImport {
 		if !existingUrls[channel.URL] {
-			_, err := database.DB.Exec("INSERT INTO channels (user_id, name, url) VALUES (?, ?, ?)", userID, channel.Name, channel.URL)
+			_, err := database.DB.Exec("INSERT INTO channels (user_id, name, url) VALUES (?, ?, ?)", user.ID, channel.Name, channel.URL)
 			if err != nil {
 				http.Error(w, "Failed to import one or more channels", http.StatusInternalServerError)
 				return
@@ -166,7 +166,7 @@ func ImportHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("HX-Trigger", "channelListChanged")
-	channels, _ := getChannelsByUserID(userID)
+	channels, _ := getChannelsByUserID(user.ID)
 	selectedChannels := make(map[string]bool)
 	templates.Channels(channels, selectedChannels, false, "").Render(r.Context(), w)
 }

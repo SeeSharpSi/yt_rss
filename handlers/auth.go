@@ -26,7 +26,8 @@ func init() {
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
-		templates.Layout(templates.RegisterPage("")).Render(r.Context(), w)
+		// Pass a default user for the layout
+		templates.Layout(templates.User{Theme: "rose-pine"}, templates.RegisterPage("")).Render(r.Context(), w)
 		return
 	}
 
@@ -42,7 +43,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	_, err = database.DB.Exec("INSERT INTO users (username, password_hash) VALUES (?, ?)", username, string(hashedPassword))
 	if err != nil {
-		templates.Layout(templates.RegisterPage("Username already taken")).Render(r.Context(), w)
+		templates.Layout(templates.User{Theme: "rose-pine"}, templates.RegisterPage("Username already taken")).Render(r.Context(), w)
 		return
 	}
 
@@ -51,7 +52,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
-		templates.Layout(templates.LoginPage("")).Render(r.Context(), w)
+		templates.Layout(templates.User{Theme: "rose-pine"}, templates.LoginPage("")).Render(r.Context(), w)
 		return
 	}
 
@@ -59,12 +60,12 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	username := r.FormValue("username")
 	password := r.FormValue("password")
 
+	var user templates.User
 	var storedHash string
-	var userID int
-	err := database.DB.QueryRow("SELECT id, password_hash FROM users WHERE username = ?", username).Scan(&userID, &storedHash)
+	err := database.DB.QueryRow("SELECT id, username, theme, password_hash FROM users WHERE username = ?", username).Scan(&user.ID, &user.Username, &user.Theme, &storedHash)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			templates.Layout(templates.LoginPage("Invalid username or password")).Render(r.Context(), w)
+			templates.Layout(templates.User{Theme: "rose-pine"}, templates.LoginPage("Invalid username or password")).Render(r.Context(), w)
 			return
 		}
 		http.Error(w, "Server error", http.StatusInternalServerError)
@@ -73,12 +74,12 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = bcrypt.CompareHashAndPassword([]byte(storedHash), []byte(password))
 	if err != nil {
-		templates.Layout(templates.LoginPage("Invalid username or password")).Render(r.Context(), w)
+		templates.Layout(templates.User{Theme: "rose-pine"}, templates.LoginPage("Invalid username or password")).Render(r.Context(), w)
 		return
 	}
 
 	session, _ := store.Get(r, "session-name")
-	session.Values["user_id"] = userID
+	session.Values["user_id"] = user.ID
 	session.Save(r, w)
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
@@ -102,7 +103,14 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 		
-		ctx := context.WithValue(r.Context(), "user_id", userID)
+		var user templates.User
+		err := database.DB.QueryRow("SELECT id, username, theme FROM users WHERE id = ?", userID).Scan(&user.ID, &user.Username, &user.Theme)
+		if err != nil {
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), "user", user)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

@@ -1,0 +1,44 @@
+package templates
+
+templ ThemeVariables(theme string) {
+	if theme == "nord" {
+		<style>
+			:root {
+				/* Palette - Nord */
+				--bg-primary: #2E3440;
+				--bg-secondary: #3B4252;
+				--text-primary: #ECEFF4;
+				--text-secondary: #D8DEE9;
+				--accent-primary: #88C0D0;
+				--accent-danger: #BF616A;
+				--border-color: #4C566A;
+			}
+		</style>
+	} else if theme == "gruvbox" {
+		<style>
+			:root {
+				/* Palette - Gruvbox */
+				--bg-primary: #282828;
+				--bg-secondary: #3c3836;
+				--text-primary: #ebdbb2;
+				--text-secondary: #d5c4a1;
+				--accent-primary: #fabd2f;
+				--accent-danger: #fb4934;
+				--border-color: #504945;
+			}
+		</style>
+	} else {
+		<style>
+			:root {
+				/* Palette - Rosé Pine Moon (Default) */
+				--bg-primary: #232136;
+				--bg-secondary: #2a273f;
+				--text-primary: #e0def4;
+				--text-secondary: #908caa;
+				--accent-primary: #c4a7e7;
+				--accent-danger: #ea9a97;
+				--border-color: #393552;
+			}
+		</style>
+	}
+}
