@@ -1,22 +1,21 @@
 package templates
 
-templ Layout(content templ.Component) {
+// User represents the data for the currently logged-in user.
+type User struct {
+	ID       int
+	Username string
+	Theme    string
+}
+
+templ Layout(user User, content templ.Component) {
 	<html>
 		<head>
 			<title>YT RSS</title>
 			<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+			@ThemeVariables(user.Theme)
 			<style>
-				/* --- Design System --- */
+				/* --- Design System (Shared) --- */
 				:root {
-					/* Palette - Rosé Pine Moon */
-					--bg-primary: #232136;       /* Base */
-					--bg-secondary: #2a273f;    /* Surface */
-					--text-primary: #e0def4;      /* Text */
-					--text-secondary: #908caa;    /* Subtle */
-					--accent-primary: #c4a7e7;    /* Iris */
-					--accent-danger: #ea9a97;     /* Rose */
-					--border-color: #393552;      /* Overlay */
-
 					/* Typography */
 					--font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 					
@@ -31,7 +30,7 @@ templ Layout(content templ.Component) {
 					--spacing-5: 2rem;
 				}
 
-				/* --- Base & Layout --- */
+				/* --- Base & Layout (Theme-agnostic) --- */
 				body {
 					font-family: var(--font-sans);
 					background-color: var(--bg-primary);
@@ -54,6 +53,8 @@ templ Layout(content templ.Component) {
 					font-weight: 600;
 					text-align: center;
 					margin-bottom: var(--spacing-5);
+					cursor: pointer;
+					user-select: none;
 				}
 
 				a {
@@ -118,6 +119,8 @@ templ Layout(content templ.Component) {
 					border: 1px solid var(--border-color);
 					border-radius: var(--border-radius);
 					font-size: 1rem;
+					background-color: var(--bg-primary);
+					color: var(--text-primary);
 				}
 
 				button, .button {
@@ -132,7 +135,7 @@ templ Layout(content templ.Component) {
 
 				button[type="submit"] {
 					background-color: var(--accent-primary);
-					color: white;
+					color: var(--bg-primary);
 					border-color: var(--accent-primary);
 				}
 				button[type="submit"]:hover {
@@ -256,15 +259,15 @@ templ Layout(content templ.Component) {
 					z-index: 9999;
 					opacity: 0;
 					transition: opacity 200ms ease-in;
-					pointer-events: none; /* Ignore mouse events when invisible */
+					pointer-events: none;
 				}
 				.htmx-request .htmx-indicator {
 					opacity: 1;
-					pointer-events: auto; /* Capture mouse events when visible */
+					pointer-events: auto;
 				}
 				.htmx-request.htmx-indicator {
 					opacity: 1;
-					pointer-events: auto; /* Capture mouse events when visible */
+					pointer-events: auto;
 				}
 				.spinner {
 					width: 60px;
@@ -311,7 +314,7 @@ templ Layout(content templ.Component) {
 				/* --- Video Page --- */
 				body:has(.full-screen-video-page) {
 					padding: 0;
-					overflow-x: hidden; /* Prevent horizontal scrollbar */
+					overflow-x: hidden;
 				}
 
 				.full-screen-video-page {
@@ -322,7 +325,7 @@ templ Layout(content templ.Component) {
 				}
 				.video-wrapper {
 					width: 100%;
-					height: 100vh; /* Make the video wrapper fill the viewport height */
+					height: 100vh;
 					background: #000;
 				}
 				.video-wrapper iframe {

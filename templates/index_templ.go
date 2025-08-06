@@ -29,7 +29,7 @@ func IndexPage() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<h1>YT RSS</h1><div id=\"channels\" hx-trigger=\"load\" hx-get=\"/channels\"></div><div id=\"videos\"><!-- This container will be populated by the form in the channels component --></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<h1 hx-post=\"/cycle-theme\" hx-swap=\"none\">YT RSS</h1><div id=\"channels\" hx-trigger=\"load\" hx-get=\"/channels\"></div><div id=\"videos\"><!-- This container will be populated by the form in the channels component --></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

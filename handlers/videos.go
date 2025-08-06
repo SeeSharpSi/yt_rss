@@ -14,7 +14,7 @@ import (
 )
 
 func VideosHandler(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(int)
+	user := r.Context().Value("user").(templates.User)
 	r.ParseForm()
 	log.Printf("--- New Request to VideosHandler ---")
 	log.Printf("Request Method: %s", r.Method)
@@ -30,7 +30,7 @@ func VideosHandler(w http.ResponseWriter, r *http.Request) {
 	showShorts := r.Form.Get("show-shorts") == "true"
 	log.Printf("Calculated showShorts boolean: %v", showShorts)
 
-	channels, err := getChannelsByUserID(userID)
+	channels, err := getChannelsByUserID(user.ID)
 	if err != nil {
 		http.Error(w, "Failed to load channels", http.StatusInternalServerError)
 		return
