@@ -41,12 +41,11 @@ This is a simple web application that allows you to aggregate YouTube channel RS
 
 ### Configuration
 
-The application uses a `.env` file for configuration. A `SESSION_KEY` is required to run the application. This key is used to encrypt user session cookies and should be a random, 32-byte string.
+The application uses a `.env` file for configuration.
 
-You can generate a key with the following command:
-```bash
-openssl rand -hex 32
-```
+*   **`SESSION_KEY`:** This is required to run the application. It's used to encrypt user session cookies and should be a random, 32-byte string. You can generate one with `openssl rand -hex 32`.
+*   **`YOUTUBE_API_KEY`:** This is required to detect live streams. You can get a key from the [Google Cloud Console](https://console.cloud.google.com/apis/credentials). You will need to enable the "YouTube Data API v3".
+
 Copy the output of this command and paste it into your `.env` file as the value for `SESSION_KEY`.
 
 ### Running the Application

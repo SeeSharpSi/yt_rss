@@ -3,7 +3,7 @@ package templates
 templ LoginPage(err string) {
 	<div class="auth-container" id="auth-container">
 		<h2>Login</h2>
-		<form action="/login" method="post">
+		<form hx-post="/login" hx-target="body" hx-swap="innerHTML">
 			if err != "" {
 				<p class="error">{ err }</p>
 			}

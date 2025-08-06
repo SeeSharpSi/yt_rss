@@ -80,9 +80,16 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	session, _ := store.Get(r, "session-name")
 	session.Values["user_id"] = user.ID
+	session.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   86400 * 7, // 7 days
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+	}
 	session.Save(r, w)
 
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	w.Header().Set("HX-Redirect", "/")
+	w.WriteHeader(http.StatusOK)
 }
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {

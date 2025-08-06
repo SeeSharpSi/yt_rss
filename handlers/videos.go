@@ -1,10 +1,13 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"sort"
 	"strconv"
 	"strings"
@@ -20,6 +23,7 @@ func VideosHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Request Method: %s", r.Method)
 	log.Printf("Form values: %v", r.Form)
 
+	// --- State Calculation ---
 	selectedChannels := make(map[string]bool)
 	if r.Form["channel"] != nil {
 		for _, url := range r.Form["channel"] {
@@ -30,6 +34,7 @@ func VideosHandler(w http.ResponseWriter, r *http.Request) {
 	showShorts := r.Form.Get("show-shorts") == "true"
 	log.Printf("Calculated showShorts boolean: %v", showShorts)
 
+	// --- Data Fetching ---
 	channels, err := getChannelsByUserID(user.ID)
 	if err != nil {
 		http.Error(w, "Failed to load channels", http.StatusInternalServerError)
@@ -45,12 +50,14 @@ func VideosHandler(w http.ResponseWriter, r *http.Request) {
 
 	fp := gofeed.NewParser()
 	var allItems []templates.VideoWithChannel
+	var videoIDs []string
 	for _, feedURL := range feedURLs {
 		feed, err := fp.ParseURL(feedURL)
 		if err == nil && feed != nil {
 			for _, item := range feed.Items {
 				videoID, err := extractVideoID(item.Link)
 				if err == nil {
+					videoIDs = append(videoIDs, videoID)
 					uploadDate := item.PublishedParsed.Format("01/02/06")
 					allItems = append(allItems, templates.VideoWithChannel{
 						Item:        item,
@@ -63,6 +70,20 @@ func VideosHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// --- Live Stream Detection (YouTube API) ---
+	liveStatus, err := getLiveStatus(videoIDs)
+	if err != nil {
+		log.Printf("Error getting live status: %v", err)
+		// Don't fail the whole request, just log the error.
+	} else {
+		for i := range allItems {
+			if status, ok := liveStatus[allItems[i].VideoID]; ok && status {
+				allItems[i].IsLive = true
+			}
+		}
+	}
+
+	// --- Filtering & Sorting ---
 	var filteredItems []templates.VideoWithChannel
 	if !showShorts {
 		log.Println("Filtering shorts...")
@@ -80,9 +101,10 @@ func VideosHandler(w http.ResponseWriter, r *http.Request) {
 		return filteredItems[i].Item.PublishedParsed.After(*filteredItems[j].Item.PublishedParsed)
 	})
 
+	// --- Pagination ---
 	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
 	if page == 0 {
-		page = 1
+		page = 1 // Default to page 1
 	}
 
 	perPage := 6
@@ -95,7 +117,7 @@ func VideosHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if start >= len(filteredItems) {
-		w.WriteHeader(http.StatusOK)
+		w.WriteHeader(http.StatusOK) // No more content
 		return
 	}
 
@@ -105,9 +127,11 @@ func VideosHandler(w http.ResponseWriter, r *http.Request) {
 
 	videosToShow := filteredItems[start:end]
 
+	// --- Rendering ---
 	templates.Videos(videosToShow, nextPage).Render(r.Context(), w)
 }
 
+// extractVideoID parses a YouTube URL and returns the video ID.
 func extractVideoID(videoURL string) (string, error) {
 	parsedURL, err := url.Parse(videoURL)
 	if err != nil {
@@ -128,4 +152,67 @@ func extractVideoID(videoURL string) (string, error) {
 		return "", fmt.Errorf("could not find video ID in URL: %s", videoURL)
 	}
 	return videoID, nil
+}
+
+// --- YouTube API Helper ---
+
+type YouTubeResponse struct {
+	Items []struct {
+		ID      string `json:"id"`
+		Snippet struct {
+			LiveBroadcastContent string `json:"liveBroadcastContent"`
+		} `json:"snippet"`
+	} `json:"items"`
+}
+
+func getLiveStatus(videoIDs []string) (map[string]bool, error) {
+	apiKey := os.Getenv("YOUTUBE_API_KEY")
+	if apiKey == "" {
+		return nil, fmt.Errorf("YOUTUBE_API_KEY not set")
+	}
+
+	if len(videoIDs) == 0 {
+		return make(map[string]bool), nil
+	}
+
+	liveStatus := make(map[string]bool)
+	
+	// Chunk the video IDs into groups of 50.
+	chunkSize := 50
+	for i := 0; i < len(videoIDs); i += chunkSize {
+		end := i + chunkSize
+		if end > len(videoIDs) {
+			end = len(videoIDs)
+		}
+		chunk := videoIDs[i:end]
+
+		ids := strings.Join(chunk, ",")
+		apiURL := fmt.Sprintf("https://www.googleapis.com/youtube/v3/videos?part=snippet&id=%s&key=%s", ids, apiKey)
+		log.Printf("Calling YouTube API: %s", apiURL)
+
+		resp, err := http.Get(apiURL)
+		if err != nil {
+			return nil, err
+		}
+		defer resp.Body.Close()
+
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+		log.Printf("YouTube API Response: %s", string(body))
+
+		var ytResp YouTubeResponse
+		if err := json.Unmarshal(body, &ytResp); err != nil {
+			return nil, err
+		}
+
+		for _, item := range ytResp.Items {
+			if item.Snippet.LiveBroadcastContent == "live" {
+				liveStatus[item.ID] = true
+			}
+		}
+	}
+
+	return liveStatus, nil
 }
