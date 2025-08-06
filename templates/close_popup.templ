@@ -1,0 +1,7 @@
+package templates
+
+// ClosePopup renders an empty div with an OOB swap attribute
+// that will replace the element with the given ID, effectively removing it.
+templ ClosePopup(id string) {
+	<div id={ id } hx-swap-oob="true"></div>
+}

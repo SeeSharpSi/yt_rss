@@ -168,7 +168,11 @@ func ImportHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("HX-Trigger", "channelListChanged")
 	channels, _ := getChannelsByUserID(user.ID)
 	selectedChannels := make(map[string]bool)
+	
+	// Render the updated channels list to the main target.
 	templates.Channels(channels, selectedChannels, false, "").Render(r.Context(), w)
+	// And also render the component that closes the popup.
+	templates.ClosePopup("import-popup").Render(r.Context(), w)
 }
 
 func getChannelsByUserID(userID int) ([]templates.Channel, error) {
