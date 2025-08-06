@@ -1,0 +1,9 @@
+package templates
+
+import "strconv"
+
+templ LoadMore(page int) {
+	<div id="load-more" hx-get={ "/videos?page=" + strconv.Itoa(page) } hx-trigger="revealed" hx-swap="outerHTML" hx-include="#channels-list">
+		Loading...
+	</div>
+}

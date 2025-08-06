@@ -1,0 +1,17 @@
+package templates
+
+templ VideoPage(videoID string) {
+	<div class="full-screen-video-page">
+		<div class="video-wrapper">
+			<iframe
+				src={ "https://www.youtube.com/embed/" + videoID }
+				frameborder="0"
+				allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+				allowfullscreen
+			></iframe>
+		</div>
+		<div class="back-button-container">
+			<a href="/" hx-boost="true" class="button back-btn">← Back to Feed</a>
+		</div>
+	</div>
+}

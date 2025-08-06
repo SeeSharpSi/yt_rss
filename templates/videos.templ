@@ -1,0 +1,34 @@
+package templates
+
+import "github.com/mmcdole/gofeed"
+
+type VideoWithChannel struct {
+	Item        *gofeed.Item
+	ChannelName string
+	VideoID     string
+	UploadDate  string
+}
+
+templ Videos(videos []VideoWithChannel, nextPage int) {
+	for _, video := range videos {
+		@Video(video)
+	}
+	if nextPage > 0 {
+		@LoadMore(nextPage)
+	}
+}
+
+templ Video(video VideoWithChannel) {
+	<div class="video">
+		<a href={ "/video/" + video.VideoID } hx-boost="true">
+			<img src={ video.Item.Extensions["media"]["group"][0].Children["thumbnail"][0].Attrs["url"] } alt={ video.Item.Title }/>
+			<div class="video-info">
+				<p class="video-title">{ video.Item.Title }</p>
+				<div class="video-meta">
+					<p class="channel-name">{ video.ChannelName }</p>
+					<p class="upload-date">{ video.UploadDate }</p>
+				</div>
+			</div>
+		</a>
+	</div>
+}

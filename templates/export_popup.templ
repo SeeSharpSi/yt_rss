@@ -1,0 +1,21 @@
+package templates
+
+templ ExportPopup(jsonData string) {
+	<div id="export-popup" class="popup-overlay" onclick="this.remove()">
+		<div class="popup-content" onclick="event.stopPropagation()">
+			<h3>Export Channels</h3>
+			<textarea readonly>{ jsonData }</textarea>
+			<div class="popup-buttons">
+				<button class="button" onclick="copyToClipboard()">Copy to Clipboard</button>
+				<button class="button close-btn" onclick="document.getElementById('export-popup').remove()">Close</button>
+			</div>
+		</div>
+	</div>
+	<script>
+		function copyToClipboard() {
+			const textarea = document.querySelector('#export-popup textarea');
+			textarea.select();
+			document.execCommand('copy');
+		}
+	</script>
+}

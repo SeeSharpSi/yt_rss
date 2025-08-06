@@ -1,0 +1,16 @@
+package templates
+
+templ ImportPopup() {
+	<div id="import-popup" class="popup-overlay" onclick="this.remove()">
+		<div class="popup-content" onclick="event.stopPropagation()">
+			<h3>Import Channels</h3>
+			<form hx-post="/import" hx-target="#channels" hx-swap="innerHTML">
+				<textarea name="json_data" placeholder="Paste your JSON here..." required></textarea>
+				<div class="popup-buttons">
+					<button type="submit" class="button">Import</button>
+					<button type="button" class="button close-btn" onclick="document.getElementById('import-popup').remove()">Close</button>
+				</div>
+			</form>
+		</div>
+	</div>
+}

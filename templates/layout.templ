@@ -1,0 +1,412 @@
+package templates
+
+templ Layout(content templ.Component) {
+	<html>
+		<head>
+			<title>YT RSS</title>
+			<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+			<style>
+				/* --- Design System --- */
+				:root {
+					/* Palette - Rosé Pine Moon */
+					--bg-primary: #232136;       /* Base */
+					--bg-secondary: #2a273f;    /* Surface */
+					--text-primary: #e0def4;      /* Text */
+					--text-secondary: #908caa;    /* Subtle */
+					--accent-primary: #c4a7e7;    /* Iris */
+					--accent-danger: #ea9a97;     /* Rose */
+					--border-color: #393552;      /* Overlay */
+
+					/* Typography */
+					--font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+					
+					/* Sizing & Spacing */
+					--border-radius: 0.5rem;
+					--shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.1);
+					--shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.2), 0 4px 6px -4px rgb(0 0 0 / 0.2);
+					--spacing-1: 0.25rem;
+					--spacing-2: 0.5rem;
+					--spacing-3: 1rem;
+					--spacing-4: 1.5rem;
+					--spacing-5: 2rem;
+				}
+
+				/* --- Base & Layout --- */
+				body {
+					font-family: var(--font-sans);
+					background-color: var(--bg-primary);
+					color: var(--text-primary);
+					margin: 0;
+					padding: var(--spacing-5);
+					display: flex;
+					flex-direction: column;
+					align-items: center;
+					line-height: 1.5;
+				}
+
+				main {
+					max-width: 960px;
+					width: 100%;
+				}
+
+				h1 {
+					font-size: 2.25rem;
+					font-weight: 600;
+					text-align: center;
+					margin-bottom: var(--spacing-5);
+				}
+
+				a {
+					color: var(--accent-primary);
+					text-decoration: none;
+					transition: opacity 0.2s ease;
+				}
+				a:hover {
+					opacity: 0.8;
+					text-decoration: none;
+				}
+
+				/* --- Channels & Forms --- */
+				#channels {
+					margin-bottom: var(--spacing-5);
+					padding: var(--spacing-4);
+					background-color: var(--bg-secondary);
+					border: 1px solid var(--border-color);
+					border-radius: var(--border-radius);
+				}
+
+				fieldset {
+					border: none;
+					padding: 0;
+					margin: 0;
+					margin-bottom: var(--spacing-4);
+				}
+				fieldset:last-of-type {
+					margin-bottom: 0;
+				}
+
+				legend {
+					font-size: 1.25rem;
+					font-weight: 600;
+					margin-bottom: var(--spacing-3);
+				}
+
+				#channels-list ul {
+					list-style: none;
+					padding: 0;
+					margin: 0;
+					display: flex;
+					flex-wrap: wrap;
+					gap: var(--spacing-3);
+				}
+
+				#channels-list li {
+					display: flex;
+					align-items: center;
+					gap: var(--spacing-2);
+				}
+
+				input[type="checkbox"] {
+					width: 1.15em;
+					height: 1.15em;
+					accent-color: var(--accent-primary);
+				}
+
+				input[type="text"],
+				input[type="password"] {
+					padding: var(--spacing-2) var(--spacing-3);
+					border: 1px solid var(--border-color);
+					border-radius: var(--border-radius);
+					font-size: 1rem;
+				}
+
+				button, .button {
+					padding: var(--spacing-2) var(--spacing-3);
+					border: 1px solid transparent;
+					border-radius: var(--border-radius);
+					font-size: 1rem;
+					font-weight: 500;
+					cursor: pointer;
+					transition: all 0.2s ease;
+				}
+
+				button[type="submit"] {
+					background-color: var(--accent-primary);
+					color: white;
+					border-color: var(--accent-primary);
+				}
+				button[type="submit"]:hover {
+					opacity: 0.9;
+				}
+
+				.delete-btn {
+					background-color: transparent;
+					color: var(--accent-danger);
+					padding: var(--spacing-1);
+					font-size: 0.875rem;
+				}
+				.delete-btn:hover {
+					background-color: var(--accent-danger);
+					color: white;
+				}
+
+				.channels-container {
+					position: relative;
+				}
+
+				.channels-header {
+					position: absolute;
+					top: 0;
+					right: 0;
+				}
+
+				.header-buttons {
+					display: flex;
+					gap: var(--spacing-2);
+				}
+
+				.logout-btn, .header-buttons .button {
+					background-color: var(--bg-primary);
+					color: var(--text-primary);
+					border: 1px solid var(--border-color);
+				}
+				.logout-btn:hover, .header-buttons .button:hover {
+					background-color: var(--border-color);
+				}
+
+				/* --- Videos Grid --- */
+				#videos {
+					display: grid;
+					grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+					gap: var(--spacing-4);
+				}
+
+				.video {
+					background-color: var(--bg-secondary);
+					border: 1px solid var(--border-color);
+					border-radius: var(--border-radius);
+					overflow: hidden;
+					box-shadow: var(--shadow-sm);
+					transition: transform 0.2s ease, box-shadow 0.2s ease;
+				}
+				.video:hover {
+					transform: translateY(-5px);
+					box-shadow: var(--shadow-lg);
+				}
+
+				.video a {
+					display: flex;
+					flex-direction: column;
+					height: 100%;
+					color: var(--text-primary);
+				}
+				.video a:hover {
+					opacity: 1;
+				}
+
+				.video img {
+					width: 100%;
+					height: 170px;
+					object-fit: cover;
+					display: block;
+					border-bottom: 1px solid var(--border-color);
+				}
+
+				.video-info {
+					padding: var(--spacing-3);
+					display: flex;
+					flex-direction: column;
+					justify-content: space-between;
+					flex-grow: 1;
+				}
+
+				.video-title {
+					margin: 0 0 var(--spacing-1) 0;
+					font-size: 1rem;
+					line-height: 1.4;
+					font-weight: 500;
+					color: var(--text-primary);
+				}
+
+				.video-meta {
+					display: flex;
+					justify-content: space-between;
+					align-items: center;
+				}
+
+				.channel-name, .upload-date {
+					margin: 0;
+					font-size: 0.875rem;
+					color: var(--text-secondary);
+				}
+				
+				#load-more {
+					text-align: center;
+					padding: var(--spacing-4);
+					font-weight: 500;
+					color: var(--text-secondary);
+				}
+
+				/* --- HTMX Loading Indicator --- */
+				.htmx-indicator {
+					position: fixed;
+					top: 50%;
+					left: 50%;
+					transform: translate(-50%, -50%);
+					z-index: 9999;
+					opacity: 0;
+					transition: opacity 200ms ease-in;
+					pointer-events: none; /* Ignore mouse events when invisible */
+				}
+				.htmx-request .htmx-indicator {
+					opacity: 1;
+					pointer-events: auto; /* Capture mouse events when visible */
+				}
+				.htmx-request.htmx-indicator {
+					opacity: 1;
+					pointer-events: auto; /* Capture mouse events when visible */
+				}
+				.spinner {
+					width: 60px;
+					height: 60px;
+					border: 6px solid var(--text-secondary);
+					border-top-color: var(--accent-primary);
+					border-radius: 50%;
+					animation: spin 1s linear infinite;
+				}
+				@keyframes spin {
+					to {
+						transform: rotate(360deg);
+					}
+				}
+
+				/* --- Auth Page --- */
+				.auth-container {
+					max-width: 400px;
+					margin: var(--spacing-5) auto;
+					padding: var(--spacing-5);
+					background-color: var(--bg-secondary);
+					border: 1px solid var(--border-color);
+					border-radius: var(--border-radius);
+				}
+				.auth-container h2 {
+					text-align: center;
+					margin-bottom: var(--spacing-4);
+				}
+				.auth-container form {
+					display: flex;
+					flex-direction: column;
+					gap: var(--spacing-3);
+				}
+				.auth-container .error {
+					color: var(--accent-danger);
+					text-align: center;
+					margin: 0;
+				}
+				.auth-container p {
+					text-align: center;
+					margin-top: var(--spacing-4);
+				}
+
+				/* --- Video Page --- */
+				body:has(.full-screen-video-page) {
+					padding: 0;
+					overflow-x: hidden; /* Prevent horizontal scrollbar */
+				}
+
+				.full-screen-video-page {
+					width: 100vw;
+					position: relative;
+					left: 50%;
+					transform: translateX(-50%);
+				}
+				.video-wrapper {
+					width: 100%;
+					height: 100vh; /* Make the video wrapper fill the viewport height */
+					background: #000;
+				}
+				.video-wrapper iframe {
+					width: 100%;
+					height: 100%;
+					border: none;
+				}
+				.back-button-container {
+					text-align: center;
+					padding: var(--spacing-5);
+				}
+				.back-btn {
+					background-color: var(--bg-secondary);
+					border: 1px solid var(--border-color);
+					color: var(--text-primary);
+				}
+
+				/* --- Popup Modals --- */
+				.popup-overlay {
+					position: fixed;
+					top: 0;
+					left: 0;
+					width: 100%;
+					height: 100%;
+					background: rgba(0, 0, 0, 0.7);
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					z-index: 2000;
+					backdrop-filter: blur(4px);
+				}
+				.popup-content {
+					background: var(--bg-secondary);
+					padding: var(--spacing-4);
+					border-radius: var(--border-radius);
+					border: 1px solid var(--border-color);
+					width: 90%;
+					max-width: 600px;
+					display: flex;
+					flex-direction: column;
+					gap: var(--spacing-4);
+				}
+				.popup-content form {
+					display: flex;
+					flex-direction: column;
+					gap: var(--spacing-4);
+				}
+				.popup-content h3 {
+					margin: 0;
+					font-size: 1.5rem;
+					font-weight: 600;
+				}
+				.popup-content textarea {
+					width: 100%;
+					min-height: 200px;
+					resize: vertical;
+					background: var(--bg-primary);
+					color: var(--text-primary);
+					border: 1px solid var(--border-color);
+					border-radius: var(--border-radius);
+					padding: var(--spacing-2);
+					font-family: monospace;
+				}
+				.popup-buttons {
+					display: flex;
+					justify-content: flex-end;
+					gap: var(--spacing-2);
+				}
+				.popup-content .close-btn {
+					background-color: var(--bg-primary);
+					color: var(--text-primary);
+					border: 1px solid var(--border-color);
+				}
+			</style>
+		</head>
+		<body>
+			<!-- Global Loading Indicator -->
+			<div id="loading-spinner" class="htmx-indicator">
+				<div class="spinner"></div>
+			</div>
+
+			<main>
+				@content
+			</main>
+		</body>
+	</html>
+}

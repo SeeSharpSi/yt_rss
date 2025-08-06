@@ -1,0 +1,16 @@
+package templates
+
+templ LoginPage(err string) {
+	<div class="auth-container" id="auth-container">
+		<h2>Login</h2>
+		<form action="/login" method="post">
+			if err != "" {
+				<p class="error">{ err }</p>
+			}
+			<input type="text" name="username" placeholder="Username" required/>
+			<input type="password" name="password" placeholder="Password" required/>
+			<button type="submit">Login</button>
+		</form>
+		<p>Don't have an account? <a href="/register">Register here</a>.</p>
+	</div>
+}

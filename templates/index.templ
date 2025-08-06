@@ -1,0 +1,9 @@
+package templates
+
+templ IndexPage() {
+	<h1>YT RSS</h1>
+	<div id="channels" hx-trigger="load" hx-get="/channels"></div>
+	<div id="videos">
+		<!-- This container will be populated by the form in the channels component -->
+	</div>
+}

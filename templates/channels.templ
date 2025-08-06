@@ -1,0 +1,65 @@
+package templates
+
+type Channel struct {
+	Name string
+	URL  string
+}
+
+templ ChannelList(channels []Channel, selectedChannels map[string]bool, showShorts bool) {
+	<form hx-post="/videos" hx-target="#videos" hx-swap="innerHTML" hx-trigger="load, change" id="channels-list">
+		<fieldset>
+			<legend>Options</legend>
+			<div>
+				<input type="checkbox" id="show-shorts" name="show-shorts" value="true" checked?={ showShorts }/>
+				<label for="show-shorts">Show Shorts</label>
+			</div>
+		</fieldset>
+		<fieldset>
+			<legend>Select Channels</legend>
+			<ul>
+				for _, channel := range channels {
+					<li>
+						<input type="checkbox" id={ channel.Name } name="channel" value={ channel.URL }/>
+						<label for={ channel.Name }>{ channel.Name }</label>
+						<button
+							class="delete-btn"
+							hx-post={ "/delete-channel?url=" + channel.URL }
+							hx-target="#channels"
+							hx-swap="innerHTML"
+							hx-include="#show-shorts"
+						>Delete</button>
+					</li>
+				}
+			</ul>
+		</fieldset>
+	</form>
+}
+
+templ Channels(channels []Channel, selectedChannels map[string]bool, showShorts bool, addChannelError string) {
+	<div class="channels-container">
+		<div class="channels-header">
+			<div class="header-buttons">
+				<button hx-get="/export" hx-target="body" hx-swap="beforeend" class="button">Export</button>
+				<button hx-get="/import" hx-target="body" hx-swap="beforeend" class="button">Import</button>
+				<a href="/logout" class="button logout-btn">Logout</a>
+			</div>
+		</div>
+		<form id="add-channel-form" hx-post="/add-channel" hx-target="#channels" hx-swap="innerHTML">
+			<fieldset>
+				<legend>Add Channel</legend>
+				if addChannelError != "" {
+					<p class="error">{ addChannelError }</p>
+				}
+				<input type="text" name="handle" placeholder="@channel-handle" required/>
+				<button
+					type="submit"
+					hx-include="#show-shorts"
+					hx-indicator="#loading-spinner"
+				>Add</button>
+			</fieldset>
+		</form>
+		<div id="channels-list-container">
+			@ChannelList(channels, selectedChannels, showShorts)
+		</div>
+	</div>
+}
