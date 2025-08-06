@@ -256,15 +256,15 @@ templ Layout(content templ.Component) {
 					z-index: 9999;
 					opacity: 0;
 					transition: opacity 200ms ease-in;
-					pointer-events: none; /* Ignore mouse events when invisible */
+					pointer-events: none;
 				}
 				.htmx-request .htmx-indicator {
 					opacity: 1;
-					pointer-events: auto; /* Capture mouse events when visible */
+					pointer-events: auto;
 				}
 				.htmx-request.htmx-indicator {
 					opacity: 1;
-					pointer-events: auto; /* Capture mouse events when visible */
+					pointer-events: auto;
 				}
 				.spinner {
 					width: 60px;
@@ -311,7 +311,7 @@ templ Layout(content templ.Component) {
 				/* --- Video Page --- */
 				body:has(.full-screen-video-page) {
 					padding: 0;
-					overflow-x: hidden; /* Prevent horizontal scrollbar */
+					overflow-x: hidden;
 				}
 
 				.full-screen-video-page {
@@ -322,7 +322,7 @@ templ Layout(content templ.Component) {
 				}
 				.video-wrapper {
 					width: 100%;
-					height: 100vh; /* Make the video wrapper fill the viewport height */
+					height: 100vh;
 					background: #000;
 				}
 				.video-wrapper iframe {

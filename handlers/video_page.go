@@ -11,5 +11,5 @@ func VideoPageHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	videoID := vars["id"]
 
-	templates.VideoPage(videoID).Render(r.Context(), w)
+	templates.Layout(templates.VideoPage(videoID)).Render(r.Context(), w)
 }
