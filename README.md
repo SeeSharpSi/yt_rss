@@ -20,8 +20,8 @@ This is a simple web application that allows you to aggregate YouTube channel RS
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/SeeSharpSi/yt_rss_feed
-    cd yt_rss_feed
+    git clone https://github.com/SeeSharpSi/yt_rss
+    cd yt_rss
     ```
 
 2.  **Install dependencies:**
