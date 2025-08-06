@@ -2,13 +2,16 @@ package templates
 
 import "github.com/mmcdole/gofeed"
 
+// VideoWithChannel now includes a flag for live streams.
 type VideoWithChannel struct {
 	Item        *gofeed.Item
 	ChannelName string
 	VideoID     string
 	UploadDate  string
+	IsLive      bool
 }
 
+// Videos now renders the list of videos and the "Load More" component if there's a next page.
 templ Videos(videos []VideoWithChannel, nextPage int) {
 	for _, video := range videos {
 		@Video(video)
@@ -21,7 +24,12 @@ templ Videos(videos []VideoWithChannel, nextPage int) {
 templ Video(video VideoWithChannel) {
 	<div class="video">
 		<a href={ "/video/" + video.VideoID } hx-boost="true">
-			<img src={ video.Item.Extensions["media"]["group"][0].Children["thumbnail"][0].Attrs["url"] } alt={ video.Item.Title }/>
+			<div class="thumbnail-container">
+				if video.IsLive {
+					<div class="live-icon">Live</div>
+				}
+				<img src={ video.Item.Extensions["media"]["group"][0].Children["thumbnail"][0].Attrs["url"] } alt={ video.Item.Title }/>
+			</div>
 			<div class="video-info">
 				<p class="video-title">{ video.Item.Title }</p>
 				<div class="video-meta">

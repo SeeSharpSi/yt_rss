@@ -202,9 +202,28 @@ templ Layout(user User, content templ.Component) {
 					flex-direction: column;
 					height: 100%;
 					color: var(--text-primary);
+					position: relative; /* Needed for absolute positioning of the icon */
 				}
 				.video a:hover {
 					opacity: 1;
+				}
+
+				.thumbnail-container {
+					position: relative;
+				}
+
+				.live-icon {
+					position: absolute;
+					bottom: 10px;
+					left: 10px;
+					background-color: var(--accent-danger);
+					color: white;
+					padding: 2px 8px;
+					border-radius: var(--border-radius);
+					font-size: 0.75rem;
+					font-weight: 600;
+					text-transform: uppercase;
+					z-index: 1;
 				}
 
 				.video img {
