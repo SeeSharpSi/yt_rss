@@ -27,6 +27,11 @@ func main() {
 	r.HandleFunc("/register", handlers.RegisterHandler)
 	r.HandleFunc("/logout", handlers.LogoutHandler)
 
+	// Add a handler for favicon.ico to prevent 404 errors in the console.
+	r.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNoContent)
+	})
+
 	authRouter := r.PathPrefix("/").Subrouter()
 	authRouter.Use(handlers.AuthMiddleware)
 
@@ -42,6 +47,7 @@ func main() {
 	authRouter.HandleFunc("/cycle-theme", handlers.CycleThemeHandler).Methods("POST")
 	authRouter.HandleFunc("/add-channel", handlers.AddChannelHandler).Methods("POST")
 	authRouter.HandleFunc("/delete-channel", handlers.DeleteChannelHandler).Methods("POST")
+	authRouter.HandleFunc("/progress", handlers.ProgressHandler).Methods("POST")
 
 	addr := ":" + strconv.Itoa(*port)
 	l, err := net.Listen("tcp", addr)

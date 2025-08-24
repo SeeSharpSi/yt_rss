@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"database/sql"
 	"net/http"
 	"regexp"
+	"yt_rss2/database"
 
 	"github.com/gorilla/mux"
 	"yt_rss2/templates"
@@ -20,5 +22,12 @@ func VideoPageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	templates.Layout(user, templates.VideoPage(videoID)).Render(r.Context(), w)
+	var progress int
+	err := database.DB.QueryRow("SELECT progress_seconds FROM video_progress WHERE user_id = ? AND video_id = ?", user.ID, videoID).Scan(&progress)
+	if err != nil && err != sql.ErrNoRows {
+		http.Error(w, "Failed to get progress", http.StatusInternalServerError)
+		return
+	}
+
+	templates.Layout(user, templates.VideoPage(videoID, progress)).Render(r.Context(), w)
 }

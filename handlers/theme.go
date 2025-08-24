@@ -6,7 +6,7 @@ import (
 	"yt_rss2/templates"
 )
 
-var themes = []string{"rose-pine", "nord", "gruvbox"}
+var themes = []string{"rose-pine", "nord", "solarized-light"}
 
 func CycleThemeHandler(w http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(templates.User)

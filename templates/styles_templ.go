@@ -34,8 +34,8 @@ func ThemeVariables(theme string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		} else if theme == "gruvbox" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<style>\n\t\t\t:root {\n\t\t\t\t/* Palette - Gruvbox */\n\t\t\t\t--bg-primary: #282828;\n\t\t\t\t--bg-secondary: #3c3836;\n\t\t\t\t--text-primary: #ebdbb2;\n\t\t\t\t--text-secondary: #d5c4a1;\n\t\t\t\t--accent-primary: #fabd2f;\n\t\t\t\t--accent-danger: #fb4934;\n\t\t\t\t--border-color: #504945;\n\t\t\t}\n\t\t</style>")
+		} else if theme == "solarized-light" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<style>\n\t\t\t:root {\n\t\t\t\t/* Palette - Solarized Light */\n\t\t\t\t--bg-primary: #fdf6e3;\n\t\t\t\t--bg-secondary: #eee8d5;\n\t\t\t\t--text-primary: #586e75;\n\t\t\t\t--text-secondary: #839496;\n\t\t\t\t--accent-primary: #268bd2;\n\t\t\t\t--accent-danger: #dc322f;\n\t\t\t\t--border-color: #93a1a1;\n\t\t\t}\n\t\t</style>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

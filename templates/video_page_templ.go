@@ -8,7 +8,9 @@ package templates
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-func VideoPage(videoID string) templ.Component {
+import "strconv"
+
+func VideoPage(videoID string, progress int) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -29,20 +31,33 @@ func VideoPage(videoID string) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"full-screen-video-page\"><div class=\"video-wrapper\"><iframe src=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"full-screen-video-page\"><div class=\"video-wrapper\"><div id=\"player\" data-video-id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs("https://www.youtube.com/embed/" + videoID)
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(videoID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/video_page.templ`, Line: 7, Col: 52}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/video_page.templ`, Line: 8, Col: 43}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen></iframe></div><div class=\"back-button-container\"><a href=\"/\" hx-boost=\"true\" class=\"button back-btn\">← Back to Feed</a></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" data-progress=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var3 string
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(progress))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/video_page.templ`, Line: 8, Col: 84}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\"></div></div><div class=\"back-button-container\"><a href=\"/\" hx-boost=\"true\" class=\"button back-btn\">← Back to Feed</a></div></div><script>\n\t\t// Ensure the onYouTubeIframeAPIReady function is globally available\n\t\t// and doesn't get redefined on subsequent HTMX swaps.\n\t\tif (typeof window.onYouTubeIframeAPIReady === 'undefined') {\n\t\t\twindow.onYouTubeIframeAPIReady = function() {\n\t\t\t\t// This function will be called by the YouTube API script once it's loaded.\n\t\t\t\t// We can leave it empty because we will trigger the player creation manually.\n\t\t\t};\n\t\t}\n\n\t\tvar player;\n\t\t\n\t\tfunction createPlayer() {\n\t\t\tconst playerDiv = document.getElementById('player');\n\t\t\t// If the player div is gone (e.g., user navigated away), do nothing.\n\t\t\tif (!playerDiv) return;\n\n\t\t\tconst videoId = playerDiv.getAttribute('data-video-id');\n\t\t\tconst startSeconds = playerDiv.getAttribute('data-progress');\n\n\t\t\tplayer = new YT.Player('player', {\n\t\t\t\theight: '100%',\n\t\t\t\twidth: '100%',\n\t\t\t\tvideoId: videoId,\n\t\t\t\tplayerVars: {\n\t\t\t\t\t'playsinline': 1,\n\t\t\t\t\t'autoplay': 1,\n\t\t\t\t\t'start': parseInt(startSeconds, 10) || 0\n\t\t\t\t},\n\t\t\t\tevents: {\n\t\t\t\t\t'onReady': onPlayerReady,\n\t\t\t\t}\n\t\t\t});\n\t\t}\n\n\t\tfunction onPlayerReady(event) {\n\t\t\tevent.target.playVideo();\n\t\t\t// Clear any previous interval to avoid multiple timers running.\n\t\t\tif (window.progressInterval) {\n\t\t\t\tclearInterval(window.progressInterval);\n\t\t\t}\n\t\t\twindow.progressInterval = setInterval(saveProgress, 5000);\n\t\t}\n\n\t\tfunction saveProgress() {\n\t\t\tif (player && typeof player.getCurrentTime === 'function' && typeof player.getVideoData === 'function') {\n\t\t\t\tconst currentTime = player.getCurrentTime();\n\t\t\t\tconst videoId = player.getVideoData().video_id;\n\t\t\t\tif (currentTime > 0 && videoId) {\n\t\t\t\t\tfetch('/progress', {\n\t\t\t\t\t\tmethod: 'POST',\n\t\t\t\t\t\theaders: {\n\t\t\t\t\t\t\t'Content-Type': 'application/json',\n\t\t\t\t\t\t},\n\t\t\t\t\t\tbody: JSON.stringify({\n\t\t\t\t\t\t\tvideo_id: videoId,\n\t\t\t\t\t\t\tprogress: Math.round(currentTime)\n\t\t\t\t\t\t}),\n\t\t\t\t\t});\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\n\t\t// --- Initialization Logic ---\n\t\t// Check if the YT API is already loaded.\n\t\tif (window.YT && window.YT.Player) {\n\t\t\t// If it is, create the player immediately.\n\t\t\tcreatePlayer();\n\t\t} else {\n\t\t\t// If not, load the script.\n\t\t\tvar tag = document.createElement('script');\n\t\t\ttag.src = \"https://www.youtube.com/iframe_api\";\n\t\t\tvar firstScriptTag = document.getElementsByTagName('script')[0];\n\t\t\tfirstScriptTag.parentNode.insertBefore(tag, firstScriptTag);\n\t\t\t\n\t\t\t// The API script will call the global onYouTubeIframeAPIReady,\n\t\t\t// and then we can create the player.\n\t\t\twindow.onYouTubeIframeAPIReady = createPlayer;\n\t\t}\n\n\t\t// Cleanup when HTMX swaps the content.\n\t\tdocument.body.addEventListener('htmx:beforeSwap', function(evt) {\n\t\t\tif (window.progressInterval) {\n\t\t\t\tclearInterval(window.progressInterval);\n\t\t\t}\n\t\t\tif (player && typeof player.destroy === 'function') {\n\t\t\t\tplayer.destroy();\n\t\t\t}\n\t\t});\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

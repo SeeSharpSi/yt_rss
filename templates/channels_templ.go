@@ -148,7 +148,7 @@ func Channels(channels []Channel, selectedChannels map[string]bool, showShorts b
 			templ_7745c5c3_Var7 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<div class=\"channels-container\"><div class=\"channels-header\"><div class=\"header-buttons\"><button hx-get=\"/export\" hx-target=\"body\" hx-swap=\"beforeend\" class=\"button\">Export</button> <button hx-get=\"/import\" hx-target=\"body\" hx-swap=\"beforeend\" class=\"button\">Import</button> <a href=\"/logout\" class=\"button logout-btn\">Logout</a></div></div><form id=\"add-channel-form\" hx-post=\"/add-channel\" hx-target=\"#channels\" hx-swap=\"innerHTML\"><fieldset><legend>Add Channel</legend> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<div class=\"channels-container\"><form id=\"add-channel-form\" hx-post=\"/add-channel\" hx-target=\"#channels\" hx-swap=\"innerHTML\"><fieldset><legend>Channel Controls</legend> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -160,7 +160,7 @@ func Channels(channels []Channel, selectedChannels map[string]bool, showShorts b
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(addChannelError)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/channels.templ`, Line: 51, Col: 39}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/channels.templ`, Line: 44, Col: 39}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
@@ -171,7 +171,7 @@ func Channels(channels []Channel, selectedChannels map[string]bool, showShorts b
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<input type=\"text\" name=\"handle\" placeholder=\"@channel-handle\" required> <button type=\"submit\" hx-include=\"#show-shorts\" hx-indicator=\"#loading-spinner\">Add</button></fieldset></form><div id=\"channels-list-container\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<div class=\"form-row\"><input type=\"text\" name=\"handle\" placeholder=\"@channel-handle\" required> <button type=\"submit\" hx-include=\"#show-shorts\" hx-indicator=\"#loading-spinner\">Add</button></div><div class=\"secondary-buttons\"><button hx-get=\"/export\" hx-target=\"body\" hx-swap=\"beforeend\" class=\"button\">Export Channels</button> <button hx-get=\"/import\" hx-target=\"body\" hx-swap=\"beforeend\" class=\"button\">Import Channels</button></div></fieldset></form><div id=\"channels-list-container\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

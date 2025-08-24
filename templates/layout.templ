@@ -11,16 +11,17 @@ templ Layout(user User, content templ.Component) {
 	<html>
 		<head>
 			<title>YT RSS</title>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
 			<script src="https://unpkg.com/htmx.org@1.9.10"></script>
 			@ThemeVariables(user.Theme)
 			<style>
 				/* --- Design System (Shared) --- */
 				:root {
 					/* Typography */
-					--font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+					--font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 					
 					/* Sizing & Spacing */
-					--border-radius: 0.5rem;
+					--border-radius: 0.75rem;
 					--shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.1);
 					--shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.2), 0 4px 6px -4px rgb(0 0 0 / 0.2);
 					--spacing-1: 0.25rem;
@@ -28,33 +29,46 @@ templ Layout(user User, content templ.Component) {
 					--spacing-3: 1rem;
 					--spacing-4: 1.5rem;
 					--spacing-5: 2rem;
+					--spacing-6: 3rem;
 				}
 
 				/* --- Base & Layout (Theme-agnostic) --- */
+				*, *::before, *::after {
+					box-sizing: border-box;
+				}
+
 				body {
 					font-family: var(--font-sans);
 					background-color: var(--bg-primary);
 					color: var(--text-primary);
 					margin: 0;
-					padding: var(--spacing-5);
-					display: flex;
-					flex-direction: column;
-					align-items: center;
-					line-height: 1.5;
+					padding: var(--spacing-4);
+					line-height: 1.6;
 				}
 
 				main {
-					max-width: 960px;
+					max-width: 1200px;
+					margin: 0 auto;
 					width: 100%;
 				}
 
+				.main-header {
+					display: flex;
+					justify-content: space-between;
+					align-items: center;
+					flex-wrap: wrap;
+					gap: var(--spacing-3);
+					margin-bottom: var(--spacing-4);
+				}
+
 				h1 {
-					font-size: 2.25rem;
-					font-weight: 600;
+					font-size: 2.5rem;
+					font-weight: 700;
 					text-align: center;
-					margin-bottom: var(--spacing-5);
+					margin: 0;
 					cursor: pointer;
 					user-select: none;
+					letter-spacing: -0.5px;
 				}
 
 				a {
@@ -74,22 +88,43 @@ templ Layout(user User, content templ.Component) {
 					background-color: var(--bg-secondary);
 					border: 1px solid var(--border-color);
 					border-radius: var(--border-radius);
+					box-shadow: var(--shadow-sm);
 				}
 
 				fieldset {
 					border: none;
 					padding: 0;
 					margin: 0;
-					margin-bottom: var(--spacing-4);
-				}
-				fieldset:last-of-type {
-					margin-bottom: 0;
 				}
 
 				legend {
 					font-size: 1.25rem;
 					font-weight: 600;
 					margin-bottom: var(--spacing-3);
+					color: var(--text-primary);
+				}
+
+				.form-row {
+					display: flex;
+					gap: var(--spacing-2);
+					align-items: center;
+				}
+
+				.secondary-buttons {
+					display: grid;
+					grid-template-columns: 1fr 1fr;
+					gap: var(--spacing-2);
+					margin-top: var(--spacing-3);
+				}
+
+				.secondary-buttons .button {
+					background-color: var(--bg-primary);
+					color: var(--text-secondary);
+					border: 1px solid var(--border-color);
+				}
+				.secondary-buttons .button:hover {
+					background-color: var(--border-color);
+					color: var(--text-primary);
 				}
 
 				#channels-list ul {
@@ -105,11 +140,15 @@ templ Layout(user User, content templ.Component) {
 					display: flex;
 					align-items: center;
 					gap: var(--spacing-2);
+					background-color: var(--bg-primary);
+					padding: var(--spacing-2) var(--spacing-3);
+					border-radius: var(--border-radius);
+					border: 1px solid var(--border-color);
 				}
 
 				input[type="checkbox"] {
-					width: 1.15em;
-					height: 1.15em;
+					width: 1.2em;
+					height: 1.2em;
 					accent-color: var(--accent-primary);
 				}
 
@@ -121,6 +160,8 @@ templ Layout(user User, content templ.Component) {
 					font-size: 1rem;
 					background-color: var(--bg-primary);
 					color: var(--text-primary);
+					flex-grow: 1;
+					min-width: 150px;
 				}
 
 				button, .button {
@@ -128,9 +169,11 @@ templ Layout(user User, content templ.Component) {
 					border: 1px solid transparent;
 					border-radius: var(--border-radius);
 					font-size: 1rem;
-					font-weight: 500;
+					font-weight: 600;
 					cursor: pointer;
 					transition: all 0.2s ease;
+					white-space: nowrap;
+					text-align: center;
 				}
 
 				button[type="submit"] {
@@ -140,6 +183,7 @@ templ Layout(user User, content templ.Component) {
 				}
 				button[type="submit"]:hover {
 					opacity: 0.9;
+					transform: translateY(-1px);
 				}
 
 				.delete-btn {
@@ -147,40 +191,26 @@ templ Layout(user User, content templ.Component) {
 					color: var(--accent-danger);
 					padding: var(--spacing-1);
 					font-size: 0.875rem;
+					border: none;
 				}
 				.delete-btn:hover {
 					background-color: var(--accent-danger);
 					color: white;
 				}
 
-				.channels-container {
-					position: relative;
-				}
-
-				.channels-header {
-					position: absolute;
-					top: 0;
-					right: 0;
-				}
-
-				.header-buttons {
-					display: flex;
-					gap: var(--spacing-2);
-				}
-
-				.logout-btn, .header-buttons .button {
+				.logout-btn {
 					background-color: var(--bg-primary);
 					color: var(--text-primary);
 					border: 1px solid var(--border-color);
 				}
-				.logout-btn:hover, .header-buttons .button:hover {
+				.logout-btn:hover {
 					background-color: var(--border-color);
 				}
 
 				/* --- Videos Grid --- */
 				#videos {
 					display: grid;
-					grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+					grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 					gap: var(--spacing-4);
 				}
 
@@ -191,6 +221,8 @@ templ Layout(user User, content templ.Component) {
 					overflow: hidden;
 					box-shadow: var(--shadow-sm);
 					transition: transform 0.2s ease, box-shadow 0.2s ease;
+					display: flex;
+					flex-direction: column;
 				}
 				.video:hover {
 					transform: translateY(-5px);
@@ -202,7 +234,7 @@ templ Layout(user User, content templ.Component) {
 					flex-direction: column;
 					height: 100%;
 					color: var(--text-primary);
-					position: relative; /* Needed for absolute positioning of the icon */
+					position: relative;
 				}
 				.video a:hover {
 					opacity: 1;
@@ -210,6 +242,9 @@ templ Layout(user User, content templ.Component) {
 
 				.thumbnail-container {
 					position: relative;
+					padding-top: 56.25%; /* 16:9 Aspect Ratio */
+					height: 0;
+					overflow: hidden;
 				}
 
 				.live-icon {
@@ -227,10 +262,12 @@ templ Layout(user User, content templ.Component) {
 				}
 
 				.video img {
+					position: absolute;
+					top: 0;
+					left: 0;
 					width: 100%;
-					height: 170px;
+					height: 100%;
 					object-fit: cover;
-					display: block;
 					border-bottom: 1px solid var(--border-color);
 				}
 
@@ -243,10 +280,10 @@ templ Layout(user User, content templ.Component) {
 				}
 
 				.video-title {
-					margin: 0 0 var(--spacing-1) 0;
-					font-size: 1rem;
+					margin: 0 0 var(--spacing-2) 0;
+					font-size: 1.05rem;
 					line-height: 1.4;
-					font-weight: 500;
+					font-weight: 600;
 					color: var(--text-primary);
 				}
 
@@ -254,6 +291,7 @@ templ Layout(user User, content templ.Component) {
 					display: flex;
 					justify-content: space-between;
 					align-items: center;
+					margin-top: auto;
 				}
 
 				.channel-name, .upload-date {
@@ -263,6 +301,7 @@ templ Layout(user User, content templ.Component) {
 				}
 				
 				#load-more {
+					grid-column: 1 / -1;
 					text-align: center;
 					padding: var(--spacing-4);
 					font-weight: 500;
@@ -304,8 +343,8 @@ templ Layout(user User, content templ.Component) {
 
 				/* --- Auth Page --- */
 				.auth-container {
-					max-width: 400px;
-					margin: var(--spacing-5) auto;
+					max-width: 420px;
+					margin: var(--spacing-6) auto;
 					padding: var(--spacing-5);
 					background-color: var(--bg-secondary);
 					border: 1px solid var(--border-color);
@@ -314,6 +353,7 @@ templ Layout(user User, content templ.Component) {
 				.auth-container h2 {
 					text-align: center;
 					margin-bottom: var(--spacing-4);
+					font-size: 1.75rem;
 				}
 				.auth-container form {
 					display: flex;
@@ -322,6 +362,9 @@ templ Layout(user User, content templ.Component) {
 				}
 				.auth-container .error {
 					color: var(--accent-danger);
+					background-color: color-mix(in srgb, var(--accent-danger) 20%, transparent);
+					padding: var(--spacing-2) var(--spacing-3);
+					border-radius: var(--border-radius);
 					text-align: center;
 					margin: 0;
 				}
@@ -331,20 +374,17 @@ templ Layout(user User, content templ.Component) {
 				}
 
 				/* --- Video Page --- */
-				body:has(.full-screen-video-page) {
-					padding: 0;
-					overflow-x: hidden;
-				}
-
 				.full-screen-video-page {
 					width: 100vw;
+					height: 100vh;
+					display: flex;
+					flex-direction: column;
 					position: relative;
 					left: 50%;
 					transform: translateX(-50%);
 				}
 				.video-wrapper {
-					width: 100%;
-					height: 100vh;
+					flex-grow: 1;
 					background: #000;
 				}
 				.video-wrapper iframe {
@@ -354,7 +394,8 @@ templ Layout(user User, content templ.Component) {
 				}
 				.back-button-container {
 					text-align: center;
-					padding: var(--spacing-5);
+					padding: var(--spacing-4);
+					background-color: var(--bg-primary);
 				}
 				.back-btn {
 					background-color: var(--bg-secondary);
@@ -375,17 +416,19 @@ templ Layout(user User, content templ.Component) {
 					justify-content: center;
 					z-index: 2000;
 					backdrop-filter: blur(4px);
+					padding: var(--spacing-3);
 				}
 				.popup-content {
 					background: var(--bg-secondary);
 					padding: var(--spacing-4);
 					border-radius: var(--border-radius);
 					border: 1px solid var(--border-color);
-					width: 90%;
+					width: 100%;
 					max-width: 600px;
 					display: flex;
 					flex-direction: column;
 					gap: var(--spacing-4);
+					box-shadow: var(--shadow-lg);
 				}
 				.popup-content form {
 					display: flex;
