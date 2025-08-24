@@ -374,9 +374,12 @@ templ Layout(user User, content templ.Component) {
 				}
 
 				/* --- Video Page --- */
+				body:has(.full-screen-video-page) {
+					padding: 0;
+					overflow-x: hidden; /* Prevent horizontal scrollbar caused by 100vw */
+				}
 				.full-screen-video-page {
 					width: 100vw;
-					height: 100vh;
 					display: flex;
 					flex-direction: column;
 					position: relative;
@@ -384,7 +387,8 @@ templ Layout(user User, content templ.Component) {
 					transform: translateX(-50%);
 				}
 				.video-wrapper {
-					flex-grow: 1;
+					width: 100%;
+					height: 100vh;
 					background: #000;
 				}
 				.video-wrapper iframe {
