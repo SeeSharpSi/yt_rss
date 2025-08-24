@@ -1,17 +1,104 @@
 package templates
 
-templ VideoPage(videoID string) {
+import "strconv"
+
+templ VideoPage(videoID string, progress int) {
 	<div class="full-screen-video-page">
 		<div class="video-wrapper">
-			<iframe
-				src={ "https://www.youtube.com/embed/" + videoID }
-				frameborder="0"
-				allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-				allowfullscreen
-			></iframe>
+			<div id="player" data-video-id={ videoID } data-progress={ strconv.Itoa(progress) }></div>
 		</div>
 		<div class="back-button-container">
 			<a href="/" hx-boost="true" class="button back-btn">← Back to Feed</a>
 		</div>
 	</div>
+	<script>
+		// Ensure the onYouTubeIframeAPIReady function is globally available
+		// and doesn't get redefined on subsequent HTMX swaps.
+		if (typeof window.onYouTubeIframeAPIReady === 'undefined') {
+			window.onYouTubeIframeAPIReady = function() {
+				// This function will be called by the YouTube API script once it's loaded.
+				// We can leave it empty because we will trigger the player creation manually.
+			};
+		}
+
+		var player;
+		
+		function createPlayer() {
+			const playerDiv = document.getElementById('player');
+			// If the player div is gone (e.g., user navigated away), do nothing.
+			if (!playerDiv) return;
+
+			const videoId = playerDiv.getAttribute('data-video-id');
+			const startSeconds = playerDiv.getAttribute('data-progress');
+
+			player = new YT.Player('player', {
+				height: '100%',
+				width: '100%',
+				videoId: videoId,
+				playerVars: {
+					'playsinline': 1,
+					'autoplay': 1,
+					'start': parseInt(startSeconds, 10) || 0
+				},
+				events: {
+					'onReady': onPlayerReady,
+				}
+			});
+		}
+
+		function onPlayerReady(event) {
+			event.target.playVideo();
+			// Clear any previous interval to avoid multiple timers running.
+			if (window.progressInterval) {
+				clearInterval(window.progressInterval);
+			}
+			window.progressInterval = setInterval(saveProgress, 5000);
+		}
+
+		function saveProgress() {
+			if (player && typeof player.getCurrentTime === 'function' && typeof player.getVideoData === 'function') {
+				const currentTime = player.getCurrentTime();
+				const videoId = player.getVideoData().video_id;
+				if (currentTime > 0 && videoId) {
+					fetch('/progress', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify({
+							video_id: videoId,
+							progress: Math.round(currentTime)
+						}),
+					});
+				}
+			}
+		}
+
+		// --- Initialization Logic ---
+		// Check if the YT API is already loaded.
+		if (window.YT && window.YT.Player) {
+			// If it is, create the player immediately.
+			createPlayer();
+		} else {
+			// If not, load the script.
+			var tag = document.createElement('script');
+			tag.src = "https://www.youtube.com/iframe_api";
+			var firstScriptTag = document.getElementsByTagName('script')[0];
+			firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+			
+			// The API script will call the global onYouTubeIframeAPIReady,
+			// and then we can create the player.
+			window.onYouTubeIframeAPIReady = createPlayer;
+		}
+
+		// Cleanup when HTMX swaps the content.
+		document.body.addEventListener('htmx:beforeSwap', function(evt) {
+			if (window.progressInterval) {
+				clearInterval(window.progressInterval);
+			}
+			if (player && typeof player.destroy === 'function') {
+				player.destroy();
+			}
+		});
+	</script>
 }

@@ -37,25 +37,24 @@ templ ChannelList(channels []Channel, selectedChannels map[string]bool, showShor
 
 templ Channels(channels []Channel, selectedChannels map[string]bool, showShorts bool, addChannelError string) {
 	<div class="channels-container">
-		<div class="channels-header">
-			<div class="header-buttons">
-				<button hx-get="/export" hx-target="body" hx-swap="beforeend" class="button">Export</button>
-				<button hx-get="/import" hx-target="body" hx-swap="beforeend" class="button">Import</button>
-				<a href="/logout" class="button logout-btn">Logout</a>
-			</div>
-		</div>
 		<form id="add-channel-form" hx-post="/add-channel" hx-target="#channels" hx-swap="innerHTML">
 			<fieldset>
-				<legend>Add Channel</legend>
+				<legend>Channel Controls</legend>
 				if addChannelError != "" {
 					<p class="error">{ addChannelError }</p>
 				}
-				<input type="text" name="handle" placeholder="@channel-handle" required/>
-				<button
-					type="submit"
-					hx-include="#show-shorts"
-					hx-indicator="#loading-spinner"
-				>Add</button>
+				<div class="form-row">
+					<input type="text" name="handle" placeholder="@channel-handle" required/>
+					<button
+						type="submit"
+						hx-include="#show-shorts"
+						hx-indicator="#loading-spinner"
+					>Add</button>
+				</div>
+				<div class="secondary-buttons">
+					<button hx-get="/export" hx-target="body" hx-swap="beforeend" class="button">Export Channels</button>
+					<button hx-get="/import" hx-target="body" hx-swap="beforeend" class="button">Import Channels</button>
+				</div>
 			</fieldset>
 		</form>
 		<div id="channels-list-container">

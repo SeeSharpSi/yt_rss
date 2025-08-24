@@ -38,12 +38,28 @@ func createTables() {
 	);
 	`
 
+	videoProgressTable := `
+	CREATE TABLE IF NOT EXISTS video_progress (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		user_id INTEGER NOT NULL,
+		video_id TEXT NOT NULL,
+		progress_seconds INTEGER NOT NULL,
+		FOREIGN KEY(user_id) REFERENCES users(id),
+		UNIQUE(user_id, video_id)
+	);
+	`
+
 	_, err := DB.Exec(usersTable)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	_, err = DB.Exec(channelsTable)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = DB.Exec(videoProgressTable)
 	if err != nil {
 		log.Fatal(err)
 	}
