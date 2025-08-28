@@ -149,15 +149,6 @@ type TranscriptParser struct {
 func (tp *TranscriptParser) Parse(rawData string) ([]FetchedTranscriptSnippet, error) {
 	var snippets []FetchedTranscriptSnippet
 
-	fmt.Printf("Raw transcript data length: %d\n", len(rawData))
-	if len(rawData) > 0 {
-		preview := rawData
-		if len(rawData) > 200 {
-			preview = rawData[:200]
-		}
-		fmt.Printf("First 200 chars: %s\n", preview)
-	}
-
 	// Parse XML
 	type Transcript struct {
 		Texts []struct {
@@ -170,11 +161,8 @@ func (tp *TranscriptParser) Parse(rawData string) ([]FetchedTranscriptSnippet, e
 	var transcript Transcript
 	err := xml.Unmarshal([]byte(rawData), &transcript)
 	if err != nil {
-		fmt.Printf("XML unmarshal error: %v\n", err)
 		return nil, err
 	}
-
-	fmt.Printf("Parsed %d text elements\n", len(transcript.Texts))
 
 	htmlRegex := tp.getHTMLRegex()
 
@@ -595,7 +583,6 @@ func RunCLI(args []string) {
 	if listTranscripts {
 		transcriptList, err := api.List(videoID)
 		if err != nil {
-			fmt.Printf("Error: %v\n", err)
 			os.Exit(1)
 		}
 		fmt.Println(transcriptList)
@@ -604,7 +591,6 @@ func RunCLI(args []string) {
 
 	transcript, err := api.Fetch(videoID, languages, false)
 	if err != nil {
-		fmt.Printf("Error: %v\n", err)
 		os.Exit(1)
 	}
 

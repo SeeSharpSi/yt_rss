@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -19,9 +18,6 @@ import (
 func VideosHandler(w http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(templates.User)
 	r.ParseForm()
-	log.Printf("--- New Request to VideosHandler ---")
-	log.Printf("Request Method: %s", r.Method)
-	log.Printf("Form values: %v", r.Form)
 
 	// --- State Calculation ---
 	selectedChannels := make(map[string]bool)
@@ -32,7 +28,6 @@ func VideosHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	showShorts := r.Form.Get("show-shorts") == "true"
-	log.Printf("Calculated showShorts boolean: %v", showShorts)
 
 	// --- Data Fetching ---
 	channels, err := getChannelsByUserID(user.ID)
@@ -73,8 +68,7 @@ func VideosHandler(w http.ResponseWriter, r *http.Request) {
 	// --- Live Stream Detection (YouTube API) ---
 	liveStatus, err := getLiveStatus(videoIDs)
 	if err != nil {
-		log.Printf("Error getting live status: %v", err)
-		// Don't fail the whole request, just log the error.
+		// Don't fail the whole request, just continue without live status.
 	} else {
 		for i := range allItems {
 			if status, ok := liveStatus[allItems[i].VideoID]; ok && status {
@@ -86,14 +80,12 @@ func VideosHandler(w http.ResponseWriter, r *http.Request) {
 	// --- Filtering & Sorting ---
 	var filteredItems []templates.VideoWithChannel
 	if !showShorts {
-		log.Println("Filtering shorts...")
 		for _, item := range allItems {
 			if !strings.Contains(item.Item.Link, "/shorts/") {
 				filteredItems = append(filteredItems, item)
 			}
 		}
 	} else {
-		log.Println("Not filtering shorts.")
 		filteredItems = allItems
 	}
 
@@ -188,7 +180,6 @@ func getLiveStatus(videoIDs []string) (map[string]bool, error) {
 
 		ids := strings.Join(chunk, ",")
 		apiURL := fmt.Sprintf("https://www.googleapis.com/youtube/v3/videos?part=snippet&id=%s&key=%s", ids, apiKey)
-		log.Printf("Calling YouTube API: %s", apiURL)
 
 		resp, err := http.Get(apiURL)
 		if err != nil {
@@ -200,7 +191,6 @@ func getLiveStatus(videoIDs []string) (map[string]bool, error) {
 		if err != nil {
 			return nil, err
 		}
-		log.Printf("YouTube API Response: %s", string(body))
 
 		var ytResp YouTubeResponse
 		if err := json.Unmarshal(body, &ytResp); err != nil {

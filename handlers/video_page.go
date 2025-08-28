@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"database/sql"
-	"fmt"
 	"net/http"
 	"regexp"
 	"yt_rss2/database"
@@ -23,23 +22,14 @@ func VideoPageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Printf("Attempting to fetch transcript for video %s\n", videoID)
-	var text string
 	api := transcript.NewYouTubeTranscriptApi()
 	trans, err := api.Fetch(videoID, []string{"en"}, false)
 	if err != nil {
-		fmt.Printf("Error fetching transcript for %s: %v\n", videoID, err)
-		text = ""
+		// Transcript fetch failed, but continue with page load
 	} else {
-		fmt.Printf("Transcript fetched successfully, %d snippets\n", len(trans.Snippets))
-		if len(trans.Snippets) > 0 {
-			fmt.Printf("First snippet: '%s'\n", trans.Snippets[0].Text)
-		}
 		formatter := &transcript.TextFormatter{}
-		text = formatter.FormatTranscript(trans, nil)
-		fmt.Printf("Formatted text length: %d characters\n", len(text))
-		fmt.Println("Transcript for video", videoID, ":")
-		fmt.Println(text)
+		formatter.FormatTranscript(trans, nil)
+		// Transcript is formatted for the summary endpoint
 	}
 
 	var progress int

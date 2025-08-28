@@ -11,7 +11,12 @@ templ VideoPage(videoID string, progress int) {
 			<a href="/" hx-boost="true" class="button back-btn">← Back to Feed</a>
 		</div>
 		<div id="summary" class="summary-container" hx-get={ "/video/" + videoID + "/summary" } hx-trigger="load" hx-swap="innerHTML">
-			<div class="summary-title">Video Summary</div>
+			<div class="summary-title">
+				Video Summary
+				<button class="refresh-btn" hx-get={ "/video/" + videoID + "/summary?refresh=1" } hx-target="#summary" hx-swap="innerHTML" title="Generate new summary">
+					↻
+				</button>
+			</div>
 			<p class="summary-content">Loading summary...</p>
 		</div>
 	</div>

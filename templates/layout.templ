@@ -494,6 +494,32 @@ templ Layout(user User, content templ.Component) {
 					font-weight: 600;
 					margin-bottom: var(--spacing-3);
 					color: var(--accent-primary);
+					display: flex;
+					justify-content: space-between;
+					align-items: center;
+				}
+				.refresh-btn {
+					background: none;
+					border: none;
+					color: var(--accent-primary);
+					font-size: 1.2rem;
+					cursor: pointer;
+					padding: 0.25rem;
+					border-radius: 0.25rem;
+					transition: all 0.2s ease;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					width: 2rem;
+					height: 2rem;
+				}
+				.refresh-btn:hover {
+					background-color: var(--accent-primary);
+					color: var(--bg-primary);
+					transform: rotate(90deg);
+				}
+				.refresh-btn:active {
+					transform: rotate(180deg);
 				}
 				.summary-content {
 					line-height: 1.6;
