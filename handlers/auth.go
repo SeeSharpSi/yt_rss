@@ -6,9 +6,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	_ "yt_rss2/config"
 	"yt_rss2/database"
 	"yt_rss2/templates"
-	_ "yt_rss2/config"
 
 	"github.com/gorilla/sessions"
 	"golang.org/x/crypto/bcrypt"
@@ -109,7 +109,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
-		
+
 		var user templates.User
 		err := database.DB.QueryRow("SELECT id, username, theme FROM users WHERE id = ?", userID).Scan(&user.ID, &user.Username, &user.Theme)
 		if err != nil {

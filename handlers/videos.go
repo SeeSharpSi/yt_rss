@@ -176,7 +176,7 @@ func getLiveStatus(videoIDs []string) (map[string]bool, error) {
 	}
 
 	liveStatus := make(map[string]bool)
-	
+
 	// Chunk the video IDs into groups of 50.
 	chunkSize := 50
 	for i := 0; i < len(videoIDs); i += chunkSize {
