@@ -10,6 +10,10 @@ templ VideoPage(videoID string, progress int) {
 		<div class="back-button-container">
 			<a href="/" hx-boost="true" class="button back-btn">← Back to Feed</a>
 		</div>
+		<div id="summary" class="summary-container" hx-get={ "/video/" + videoID + "/summary" } hx-trigger="load" hx-swap="innerHTML">
+			<div class="summary-title">Video Summary</div>
+			<p class="summary-content">Loading summary...</p>
+		</div>
 	</div>
 	<script>
 		// Ensure the onYouTubeIframeAPIReady function is globally available
@@ -25,11 +29,16 @@ templ VideoPage(videoID string, progress int) {
 		
 		function createPlayer() {
 			const playerDiv = document.getElementById('player');
+			console.log('Player div:', playerDiv);
 			// If the player div is gone (e.g., user navigated away), do nothing.
-			if (!playerDiv) return;
+			if (!playerDiv) {
+				console.log('Player div not found');
+				return;
+			}
 
 			const videoId = playerDiv.getAttribute('data-video-id');
 			const startSeconds = playerDiv.getAttribute('data-progress');
+			console.log('Creating player for video:', videoId, 'progress:', startSeconds);
 
 			player = new YT.Player('player', {
 				height: '100%',
@@ -47,6 +56,7 @@ templ VideoPage(videoID string, progress int) {
 		}
 
 		function onPlayerReady(event) {
+			console.log('Player ready, starting video');
 			event.target.playVideo();
 			// Clear any previous interval to avoid multiple timers running.
 			if (window.progressInterval) {
@@ -77,15 +87,17 @@ templ VideoPage(videoID string, progress int) {
 		// --- Initialization Logic ---
 		// Check if the YT API is already loaded.
 		if (window.YT && window.YT.Player) {
+			console.log('YT API already loaded, creating player');
 			// If it is, create the player immediately.
 			createPlayer();
 		} else {
+			console.log('Loading YT API script');
 			// If not, load the script.
 			var tag = document.createElement('script');
 			tag.src = "https://www.youtube.com/iframe_api";
 			var firstScriptTag = document.getElementsByTagName('script')[0];
 			firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-			
+
 			// The API script will call the global onYouTubeIframeAPIReady,
 			// and then we can create the player.
 			window.onYouTubeIframeAPIReady = createPlayer;
@@ -96,7 +108,8 @@ templ VideoPage(videoID string, progress int) {
 			if (window.progressInterval) {
 				clearInterval(window.progressInterval);
 			}
-			if (player && typeof player.destroy === 'function') {
+			// Only destroy player if the swap affects the video area
+			if (player && typeof player.destroy === 'function' && evt.detail.target.id !== 'summary') {
 				player.destroy();
 			}
 		});

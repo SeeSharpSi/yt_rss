@@ -479,6 +479,37 @@ templ Layout(user User, content templ.Component) {
 					border: 1px solid var(--border-color);
 					color: var(--text-primary);
 				}
+				.summary-container {
+					max-width: 1200px;
+					margin: 0 auto;
+					padding: var(--spacing-4);
+					background-color: var(--bg-secondary);
+					border: 1px solid var(--border-color);
+					border-radius: var(--border-radius);
+					box-shadow: var(--shadow-sm);
+					margin-bottom: var(--spacing-5);
+				}
+				.summary-title {
+					font-size: 1.25rem;
+					font-weight: 600;
+					margin-bottom: var(--spacing-3);
+					color: var(--accent-primary);
+				}
+				.summary-content {
+					line-height: 1.6;
+					color: var(--text-primary);
+					margin: 0;
+				}
+				.timestamp-link {
+					color: var(--accent-primary);
+					text-decoration: none;
+					font-weight: 600;
+					transition: opacity 0.2s ease;
+				}
+				.timestamp-link:hover {
+					opacity: 0.8;
+					text-decoration: underline;
+				}
 
 				/* --- Popup Modals --- */
 				.popup-overlay {
