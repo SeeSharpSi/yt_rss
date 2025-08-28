@@ -12,12 +12,15 @@ import (
 	"yt_rss2/templates"
 
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 	_ "yt_rss2/config"
 )
 
 func main() {
 	port := flag.Int("port", 0, "port to run the server on")
 	flag.Parse()
+
+	godotenv.Load()
 
 	database.InitDB()
 
@@ -41,12 +44,14 @@ func main() {
 	})
 	authRouter.HandleFunc("/videos", handlers.VideosHandler)
 	authRouter.HandleFunc("/video/{id}", handlers.VideoPageHandler)
+	authRouter.HandleFunc("/video/{id}/summary", handlers.VideoSummaryHandler)
 	authRouter.HandleFunc("/channels", handlers.ChannelsHandler)
 	authRouter.HandleFunc("/export", handlers.ExportHandler)
 	authRouter.HandleFunc("/import", handlers.ImportHandler)
 	authRouter.HandleFunc("/cycle-theme", handlers.CycleThemeHandler).Methods("POST")
 	authRouter.HandleFunc("/add-channel", handlers.AddChannelHandler).Methods("POST")
 	authRouter.HandleFunc("/delete-channel", handlers.DeleteChannelHandler).Methods("POST")
+	authRouter.HandleFunc("/toggle-channel", handlers.ToggleChannelHandler).Methods("POST")
 	authRouter.HandleFunc("/progress", handlers.ProgressHandler).Methods("POST")
 
 	addr := ":" + strconv.Itoa(*port)

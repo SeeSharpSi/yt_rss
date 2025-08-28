@@ -49,6 +49,15 @@ func createTables() {
 	);
 	`
 
+	summariesTable := `
+	CREATE TABLE IF NOT EXISTS summaries (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		video_id TEXT NOT NULL UNIQUE,
+		summary TEXT NOT NULL,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+	);
+	`
+
 	_, err := DB.Exec(usersTable)
 	if err != nil {
 		log.Fatal(err)
@@ -63,4 +72,25 @@ func createTables() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	_, err = DB.Exec(summariesTable)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+// GetSummary retrieves a summary for a video ID
+func GetSummary(videoID string) (string, error) {
+	var summary string
+	err := DB.QueryRow("SELECT summary FROM summaries WHERE video_id = ?", videoID).Scan(&summary)
+	if err != nil {
+		return "", err
+	}
+	return summary, nil
+}
+
+// SaveSummary saves a summary for a video ID
+func SaveSummary(videoID, summary string) error {
+	_, err := DB.Exec("INSERT OR REPLACE INTO summaries (video_id, summary) VALUES (?, ?)", videoID, summary)
+	return err
 }

@@ -111,6 +111,37 @@ func DeleteChannelHandler(w http.ResponseWriter, r *http.Request) {
 	templates.Channels(channels, selectedChannels, showShorts, "").Render(r.Context(), w)
 }
 
+func ToggleChannelHandler(w http.ResponseWriter, r *http.Request) {
+	user := r.Context().Value("user").(templates.User)
+	r.ParseForm()
+
+	channelURL := r.FormValue("url")
+	showShorts := r.FormValue("showShorts") == "true"
+
+	channels, err := getChannelsByUserID(user.ID)
+	if err != nil {
+		http.Error(w, "Failed to load channels", http.StatusInternalServerError)
+		return
+	}
+
+	// Get current selected channels from the form
+	selectedChannels := make(map[string]bool)
+	if r.Form["channel"] != nil {
+		for _, url := range r.Form["channel"] {
+			selectedChannels[url] = true
+		}
+	}
+
+	// Toggle the channel selection
+	if selectedChannels[channelURL] {
+		delete(selectedChannels, channelURL)
+	} else {
+		selectedChannels[channelURL] = true
+	}
+
+	templates.ChannelList(channels, selectedChannels, showShorts).Render(r.Context(), w)
+}
+
 func ExportHandler(w http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(templates.User)
 	channels, err := getChannelsByUserID(user.ID)
@@ -168,7 +199,7 @@ func ImportHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("HX-Trigger", "channelListChanged")
 	channels, _ := getChannelsByUserID(user.ID)
 	selectedChannels := make(map[string]bool)
-	
+
 	// Render the updated channels list to the main target.
 	templates.Channels(channels, selectedChannels, false, "").Render(r.Context(), w)
 	// And also render the component that closes the popup.
