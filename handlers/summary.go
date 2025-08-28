@@ -83,51 +83,64 @@ document.addEventListener('click', function(e) {
 	defer client.Close()
 
 	model := client.GenerativeModel("gemini-2.5-flash-lite")
-	prompt := `You are creating a summary of a Youtube video in the form of a research paper's abstract. The transcript below includes timestamps in [MM:SS] format.
+	prompt := `You are an expert academic research assistant, skilled in summarizing complex information into clear and concise abstracts. Your task is to create a summary of a YouTube video transcript.
 
-Please provide a concise but comprehensive summary of this video transcript, without mentioning that it's an abstract. Your summary should:
+## Summary Guidelines
 
-1. Include relevant timestamps as clickable links using this EXACT format: <a href="#" class="timestamp-link" data-time="SECONDS">MM:SS</a>
+Your summary should be structured like a research paper's abstract and adhere to the following guidelines:
 
-	CRITICAL TIMESTAMP CONVERSION RULES:
-	- Convert [MM:SS] format to TOTAL SECONDS: minutes * 60 + seconds
-	- Convert [HH:MM:SS] format to TOTAL SECONDS: (hours * 3600) + (minutes * 60) + seconds
-	- Examples for [MM:SS] format:
-	  - [0:05] = 0*60 + 5 = 5 seconds → data-time="5"
-	  - [0:15] = 0*60 + 15 = 15 seconds → data-time="15"
-	  - [0:30] = 0*60 + 30 = 30 seconds → data-time="30"
-	  - [0:45] = 0*60 + 45 = 45 seconds → data-time="45"
-	  - [1:00] = 1*60 + 0 = 60 seconds → data-time="60"
-	  - [1:10] = 1*60 + 10 = 70 seconds → data-time="70"
-	  - [1:30] = 1*60 + 30 = 90 seconds → data-time="90"
-	  - [2:15] = 2*60 + 15 = 135 seconds → data-time="135"
-	  - [2:30] = 2*60 + 30 = 150 seconds → data-time="150"
-	  - [5:20] = 5*60 + 20 = 320 seconds → data-time="320"
-	  - [10:45] = 10*60 + 45 = 645 seconds → data-time="645"
-	  - [15:30] = 15*60 + 30 = 930 seconds → data-time="930"
-	- Examples for [HH:MM:SS] format:
-	  - [0:00:30] = (0*3600) + (0*60) + 30 = 30 seconds → data-time="30"
-	  - [0:01:15] = (0*3600) + (1*60) + 15 = 75 seconds → data-time="75"
-	  - [0:02:45] = (0*3600) + (2*60) + 45 = 165 seconds → data-time="165"
-	  - [0:05:30] = (0*3600) + (5*60) + 30 = 330 seconds → data-time="330"
-	  - [0:10:15] = (0*3600) + (10*60) + 15 = 615 seconds → data-time="615"
-	  - [1:00:00] = (1*3600) + (0*60) + 0 = 3600 seconds → data-time="3600"
-	  - [1:15:30] = (1*3600) + (15*60) + 30 = 4530 seconds → data-time="4530"
-	  - [2:30:45] = (2*3600) + (30*60) + 45 = 9045 seconds → data-time="9045"
+* **Concise and Comprehensive**: Provide a summary that is both brief and covers the main points of the video.
+* **No Introductory Phrases**: Do not begin with 'This video is about...' or 'In this video...'. Jump directly into the summary.
+* **Formal Tone**: Maintain an academic and objective tone throughout the summary.
+* **HTML Formatting**: Use HTML tags like <p>, <strong>, and <em> to structure the summary and emphasize key points. Do not use Markdown.
+* **Clickable Timestamps**: Include relevant timestamps in the format: <a href="#" class="timestamp-link" data-time="SECONDS">MM:SS</a>.
 
-2. Use HTML formatting with appropriate tags like <p>, <strong>, <em>, <br> for readability
-3. Highlight key points and main topics discussed
-4. Keep the summary engaging and suitable for an abstract
-5. At the end of the summary, include a list of notable events with their corresponding time stamps
+## Timestamp Conversion Rules
 
-** CONSTRAINTS ** 
-1. You MUST NOT use crude language or profanity 
-2. You MUST NOT use Markdown to format text 
-3. You MUST use HTML to format text
+You must convert all timestamps from the [MM:SS] or [HH:MM:SS] format in the transcript to total seconds for the 'data-time' attribute.
 
-IMPORTANT: Always use the clickable link format for timestamps, never plain text timestamps. Double-check your timestamp calculations!
+### [MM:SS] to Seconds
+**Formula**: 'minutes * 60 + seconds'
+* **[0:05]** = 0*60 + 5 = 5 seconds → 'data-time="5"'
+* **[0:15]** = 0*60 + 15 = 15 seconds → 'data-time="15"'
+* **[0:30]** = 0*60 + 30 = 30 seconds → 'data-time="30"'
+* **[0:45]** = 0*60 + 45 = 45 seconds → 'data-time="45"'
+* **[1:00]** = 1*60 + 0 = 60 seconds → 'data-time="60"'
+* **[1:10]** = 1*60 + 10 = 70 seconds → 'data-time="70"'
+* **[2:30]** = 2*60 + 30 = 150 seconds → 'data-time="150"'
+* **[5:20]** = 5*60 + 20 = 320 seconds → 'data-time="320"'
+* **[10:45]** = 10*60 + 45 = 645 seconds → 'data-time="645"'
+* **[15:30]** = 15*60 + 30 = 930 seconds → 'data-time="930"'
+* **[25:10]** = 25*60 + 10 = 1510 seconds → 'data-time="1510"'
+* **[59:59]** = 59*60 + 59 = 3599 seconds → 'data-time="3599"'
 
-Transcript:
+### [HH:MM:SS] to Seconds
+**Formula**: '(hours * 3600) + (minutes * 60) + seconds'
+* **[0:00:30]** = (0*3600) + (0*60) + 30 = 30 seconds → 'data-time="30"'
+* **[0:01:15]** = (0*3600) + (1*60) + 15 = 75 seconds → 'data-time="75"'
+* **[0:05:30]** = (0*3600) + (5*60) + 30 = 330 seconds → 'data-time="330"'
+* **[0:10:15]** = (0*3600) + (10*60) + 15 = 615 seconds → 'data-time="615"'
+* **[1:00:00]** = (1*3600) + (0*60) + 0 = 3600 seconds → 'data-time="3600"'
+* **[1:15:30]** = (1*3600) + (15*60) + 30 = 4530 seconds → 'data-time="4530"'
+* **[2:30:45]** = (2*3600) + (30*60) + 45 = 9045 seconds → 'data-time="9045"'
+* **[3:01:05]** = (3*3600) + (1*60) + 5 = 10865 seconds → 'data-time="10865"'
+
+## Key Events
+
+After the main summary, create a section with a heading <h3>Key Moments</h3> and list the most notable events or topics with their corresponding clickable timestamps.
+
+**Example of a good summary structure:**
+
+<p>This is a paragraph of the summary with <strong>key terms</strong> emphasized. It includes a clickable timestamp right here: <a href="#" class="timestamp-link" data-time="90">1:30</a>.</p>
+<p>This is another paragraph that continues to explain the main topics of the video, with another important timestamp here: <a href="#" class="timestamp-link" data-time="320">5:20</a>.</p>
+<h3>Key Moments</h3>
+<ul>
+    <li><a href="#" class="timestamp-link" data-time="90">1:30</a> - First major point is introduced.</li>
+    <li><a href="#" class="timestamp-link" data-time="320">5:20</a> - A critical demonstration or example is shown.</li>
+</ul>
+
+## Transcript to Summarize
+
 ` + text
 
 	print("starting...")
