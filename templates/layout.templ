@@ -521,6 +521,15 @@ templ Layout(user User, content templ.Component) {
 				.refresh-btn:active {
 					transform: rotate(180deg);
 				}
+				.htmx-indicator {
+					display: none;
+				}
+				.htmx-request .htmx-indicator {
+					display: block;
+				}
+				.htmx-request #summary-content {
+					display: none;
+				}
 				.summary-content {
 					line-height: 1.6;
 					color: var(--text-primary);

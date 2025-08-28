@@ -10,17 +10,29 @@ templ VideoPage(videoID string, progress int) {
 		<div class="back-button-container">
 			<a href="/" hx-boost="true" class="button back-btn">← Back to Feed</a>
 		</div>
-		<div id="summary" class="summary-container" hx-get={ "/video/" + videoID + "/summary" } hx-trigger="load" hx-swap="innerHTML">
+		<div id="summary" class="summary-container">
 			<div class="summary-title">
 				Video Summary
-				<button class="refresh-btn" hx-get={ "/video/" + videoID + "/summary?refresh=1" } hx-target="#summary" hx-swap="innerHTML" title="Generate new summary">
+				<button class="refresh-btn"
+						hx-get={ "/video/" + videoID + "/summary?refresh=1" }
+						hx-target="#summary-content"
+						hx-swap="innerHTML"
+						onclick="showLoading()"
+						title="Generate new summary">
 					↻
 				</button>
 			</div>
-			<p class="summary-content">Loading summary...</p>
+
+			<div id="summary-content" hx-get={ "/video/" + videoID + "/summary" } hx-trigger="load" hx-swap="innerHTML">
+				<p class="summary-content">Loading summary...</p>
+			</div>
 		</div>
 	</div>
 	<script>
+		function showLoading() {
+			document.getElementById('summary-content').innerHTML = '<p class="summary-content">Loading summary...</p>';
+		}
+
 		// Ensure the onYouTubeIframeAPIReady function is globally available
 		// and doesn't get redefined on subsequent HTMX swaps.
 		if (typeof window.onYouTubeIframeAPIReady === 'undefined') {
@@ -114,7 +126,7 @@ templ VideoPage(videoID string, progress int) {
 				clearInterval(window.progressInterval);
 			}
 			// Only destroy player if the swap affects the video area
-			if (player && typeof player.destroy === 'function' && evt.detail.target.id !== 'summary') {
+			if (player && typeof player.destroy === 'function' && evt.detail.target.id !== 'summary' && evt.detail.target.id !== 'summary-content') {
 				player.destroy();
 			}
 		});

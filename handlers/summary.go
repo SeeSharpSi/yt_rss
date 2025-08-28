@@ -34,27 +34,21 @@ func VideoSummaryHandler(w http.ResponseWriter, r *http.Request) {
 		if err == nil {
 			// Summary exists, return it
 			w.Header().Set("Content-Type", "text/html")
-			html := fmt.Sprintf(`<div class="summary-title">
-	Video Summary
-	<button class="refresh-btn" hx-get="/video/%s/summary?refresh=1" hx-target="#summary" hx-swap="innerHTML" title="Generate new summary">
-		↻
-	</button>
-</div>
-<div class="summary-content">%s</div>
+			html := fmt.Sprintf(`<div class="summary-content">%s</div>
 <script>
 document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('timestamp-link')) {
-        e.preventDefault();
-        const time = e.target.dataset.time;
-        if (window.player && typeof window.player.seekTo === 'function') {
-            window.player.seekTo(parseFloat(time), true);
-            console.log('Seeking to timestamp:', time);
-        } else {
-            console.log('YouTube player not available');
-        }
-    }
+	if (e.target.classList.contains('timestamp-link')) {
+		e.preventDefault();
+		const time = e.target.dataset.time;
+		if (window.player && typeof window.player.seekTo === 'function') {
+			window.player.seekTo(parseFloat(time), true);
+			console.log('Seeking to timestamp:', time);
+		} else {
+			console.log('YouTube player not available');
+		}
+	}
 });
-</script>`, videoID, existingSummary)
+</script>`, existingSummary)
 			w.Write([]byte(html))
 			return
 		}
@@ -95,13 +89,31 @@ Please provide a concise but comprehensive summary of this video transcript, wit
 
 1. Include relevant timestamps as clickable links using this EXACT format: <a href="#" class="timestamp-link" data-time="SECONDS">MM:SS</a>
 
-CRITICAL TIMESTAMP CONVERSION RULES:
-- Convert [MM:SS] format to TOTAL SECONDS: minutes * 60 + seconds
-- Examples:
-  - [0:15] = 0*60 + 15 = 15 seconds → data-time="15"
-  - [1:10] = 1*60 + 10 = 70 seconds → data-time="70"
-  - [2:30] = 2*60 + 30 = 150 seconds → data-time="150"
-  - [10:45] = 10*60 + 45 = 645 seconds → data-time="645"
+	CRITICAL TIMESTAMP CONVERSION RULES:
+	- Convert [MM:SS] format to TOTAL SECONDS: minutes * 60 + seconds
+	- Convert [HH:MM:SS] format to TOTAL SECONDS: (hours * 3600) + (minutes * 60) + seconds
+	- Examples for [MM:SS] format:
+	  - [0:05] = 0*60 + 5 = 5 seconds → data-time="5"
+	  - [0:15] = 0*60 + 15 = 15 seconds → data-time="15"
+	  - [0:30] = 0*60 + 30 = 30 seconds → data-time="30"
+	  - [0:45] = 0*60 + 45 = 45 seconds → data-time="45"
+	  - [1:00] = 1*60 + 0 = 60 seconds → data-time="60"
+	  - [1:10] = 1*60 + 10 = 70 seconds → data-time="70"
+	  - [1:30] = 1*60 + 30 = 90 seconds → data-time="90"
+	  - [2:15] = 2*60 + 15 = 135 seconds → data-time="135"
+	  - [2:30] = 2*60 + 30 = 150 seconds → data-time="150"
+	  - [5:20] = 5*60 + 20 = 320 seconds → data-time="320"
+	  - [10:45] = 10*60 + 45 = 645 seconds → data-time="645"
+	  - [15:30] = 15*60 + 30 = 930 seconds → data-time="930"
+	- Examples for [HH:MM:SS] format:
+	  - [0:00:30] = (0*3600) + (0*60) + 30 = 30 seconds → data-time="30"
+	  - [0:01:15] = (0*3600) + (1*60) + 15 = 75 seconds → data-time="75"
+	  - [0:02:45] = (0*3600) + (2*60) + 45 = 165 seconds → data-time="165"
+	  - [0:05:30] = (0*3600) + (5*60) + 30 = 330 seconds → data-time="330"
+	  - [0:10:15] = (0*3600) + (10*60) + 15 = 615 seconds → data-time="615"
+	  - [1:00:00] = (1*3600) + (0*60) + 0 = 3600 seconds → data-time="3600"
+	  - [1:15:30] = (1*3600) + (15*60) + 30 = 4530 seconds → data-time="4530"
+	  - [2:30:45] = (2*3600) + (30*60) + 45 = 9045 seconds → data-time="9045"
 
 2. Use HTML formatting with appropriate tags like <p>, <strong>, <em>, <br> for readability
 3. Highlight key points and main topics discussed
@@ -147,26 +159,20 @@ Transcript:
 	}
 
 	w.Header().Set("Content-Type", "text/html")
-	html := fmt.Sprintf(`<div class="summary-title">
-	Video Summary
-	<button class="refresh-btn" hx-get="/video/%s/summary?refresh=1" hx-target="#summary" hx-swap="innerHTML" title="Generate new summary">
-		↻
-	</button>
-</div>
-<div class="summary-content">%s</div>
+	html := fmt.Sprintf(`<div class="summary-content">%s</div>
 <script>
 document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('timestamp-link')) {
-        e.preventDefault();
-        const time = e.target.dataset.time;
-        if (window.player && typeof window.player.seekTo === 'function') {
-            window.player.seekTo(parseFloat(time), true);
-            console.log('Seeking to timestamp:', time);
-        } else {
-            console.log('YouTube player not available');
-        }
-    }
+	if (e.target.classList.contains('timestamp-link')) {
+		e.preventDefault();
+		const time = e.target.dataset.time;
+		if (window.player && typeof window.player.seekTo === 'function') {
+			window.player.seekTo(parseFloat(time), true);
+			console.log('Seeking to timestamp:', time);
+		} else {
+			console.log('YouTube player not available');
+		}
+	}
 });
-</script>`, videoID, summary)
+</script>`, summary)
 	w.Write([]byte(html))
 }
