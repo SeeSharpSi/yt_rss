@@ -47,6 +47,7 @@ func main() {
 	authRouter.HandleFunc("/cycle-theme", handlers.CycleThemeHandler).Methods("POST")
 	authRouter.HandleFunc("/add-channel", handlers.AddChannelHandler).Methods("POST")
 	authRouter.HandleFunc("/delete-channel", handlers.DeleteChannelHandler).Methods("POST")
+	authRouter.HandleFunc("/toggle-channel", handlers.ToggleChannelHandler).Methods("POST")
 	authRouter.HandleFunc("/progress", handlers.ProgressHandler).Methods("POST")
 
 	addr := ":" + strconv.Itoa(*port)
